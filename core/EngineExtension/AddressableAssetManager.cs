@@ -1,4 +1,6 @@
-﻿using System;
+﻿#if CF_ADDRESSABLE
+
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine.AddressableAssets;
@@ -53,3 +55,5 @@ namespace cfEngine.Asset
         }
     }
 }
+
+#endif
