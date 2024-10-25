@@ -11,6 +11,7 @@ using cfEngine.Serialize;
 using cfEngine.Util;
 using cfUnityEngine.GameState;
 using UnityEngine;
+using Debug = UnityEngine.Debug;
 
 public class GameEntry : MonoBehaviour
 {
@@ -24,7 +25,7 @@ public class GameEntry : MonoBehaviour
         }
         catch (Exception e)
         {
-            Log.LogException(e);
+            Debug.LogException(e);
         }
     }
     
