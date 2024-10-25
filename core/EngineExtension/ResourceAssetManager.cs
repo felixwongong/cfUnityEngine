@@ -21,9 +21,10 @@ public class ResourceAssetManager : AssetManager<UnityEngine.Object>
 
     protected override async Task<AssetHandle<T>> _LoadAsync<T>(string path, CancellationToken token)
     {
-        if (token.WaitHandle != null)
+        if (token.IsCancellationRequested)
         {
-            Log.LogWarning("Resources Load can't really be cancelled");
+            Log.LogInfo($"Resource load {path} operation cancelled");
+            return null;
         }
 
         try
