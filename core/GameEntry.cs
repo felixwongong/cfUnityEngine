@@ -39,7 +39,7 @@ public class GameEntry : MonoBehaviour
         {
             taskToken = cts.Token,
             info = new InfoLayer(new StreamingAssetStorage("Info"), JsonSerializer.Instance),
-            asset = new ResourceAssetManager(),
+            asset = new AddressableAssetManager(),
             pool = new PoolManager(),
             gsm = new GameStateMachine(),
             userData = new UserDataManager(new FileStorage(Application.persistentDataPath), JsonSerializer.Instance),
