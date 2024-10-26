@@ -11,8 +11,6 @@ namespace cfUnityEngine.GameState.Bootstrap
 
         protected internal override void StartContext(GameStateMachine gsm, StateParam param)
         {
-            Game.UserData.Register(Game.Meta.Statistic);
-
             Game.UserData.LoadInitializeAsync(Game.TaskToken).ContinueWith(t =>
             {
                 if (t.IsCompletedSuccessfully)

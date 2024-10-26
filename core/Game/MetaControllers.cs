@@ -1,18 +1,25 @@
 using System;
-using cfEngine.Core;
-using cfEngine.Meta.Statistic;
 
-public class MetaControllers : IDisposable
+namespace cfEngine.Meta
 {
-    public readonly StatisticController Statistic;
-
-    public MetaControllers()
+    public class MetaControllers : IDisposable
     {
-        Statistic = new StatisticController();
-    }
+#if CF_STATISTIC
+        public readonly StatisticController Statistic;
+#endif
 
-    public void Dispose()
-    {
-        Statistic?.Dispose();
+        public MetaControllers()
+        {
+#if CF_STATISTIC
+            Statistic = new StatisticController();
+#endif
+        }
+
+        public void Dispose()
+        {
+#if CF_STATISTIC
+            Statistic?.Dispose();
+#endif
+        }
     }
 }
