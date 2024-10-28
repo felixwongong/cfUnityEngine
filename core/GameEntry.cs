@@ -29,7 +29,7 @@ public class GameEntry : MonoBehaviour
         }
     }
     
-    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
     public static void Init()
     {
         Log.SetLogger(new UnityLogger());
