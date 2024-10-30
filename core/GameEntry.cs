@@ -75,4 +75,16 @@ public class GameEntry : MonoBehaviour
     {
         Log.LogInfo($"Game state changed, {record.LastState.ToString()} -> {record.NewState.ToString()}");
     }
+
+    private void Start()
+    {
+        Game.Gsm.OnAfterStateChange += OnBootstrapEnd;
+        void OnBootstrapEnd(StateChangeRecord<GameStateId> record)
+        {
+            if (record.NewState != GameStateId.BootstrapEnd)
+                return;
+            
+            Game.Gsm.OnAfterStateChange -= OnBootstrapEnd;
+        }
+    }
 }

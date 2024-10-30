@@ -111,12 +111,14 @@ namespace cfUnityEngine.Util
                     _lastState = _currentState;
                 }
 
-                nextState.enabled = true;
-                nextState.StartContext((TStateMachine)this, param);
                 _currentState = nextState;
-
-                OnAfterStateChange?.Invoke(new StateChangeRecord<TStateId>
-                    { LastState = _currentState.Id, NewState = nextState.Id });
+                _currentState.enabled = true;
+                if (_lastState != null)
+                {
+                    OnAfterStateChange?.Invoke(new StateChangeRecord<TStateId>
+                        { LastState = _lastState.Id, NewState = _currentState.Id });
+                }
+                _currentState.StartContext((TStateMachine)this, param);
             }
             catch (Exception ex)
             {
