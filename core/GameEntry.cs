@@ -55,6 +55,7 @@ public class GameEntry : MonoBehaviour
         Game.MakeInstance(initParam);
         
         Game.Auth.RegisterPlatform(new LocalPlatform());
+        Game.UserData.RegisterSavables();
         
         Game.Gsm.OnAfterStateChange += OnStateChanged;
         Application.quitting += OnApplicationQuit;
