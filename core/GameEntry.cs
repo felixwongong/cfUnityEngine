@@ -1,5 +1,6 @@
 using System;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using cfEngine.Asset;
 using cfEngine.Core;
@@ -77,8 +78,15 @@ public class GameEntry : MonoBehaviour
         Log.LogInfo($"Game state changed, {record.LastState.ToString()} -> {record.NewState.ToString()}");
     }
 
-    private void Start()
+    [Conditional("UNITY_EDITOR")]
+    public static void RegisterEditorPostBootstrapAction([NotNull] Action action)
     {
+        if (Game.Gsm.CurrentStateId > GameStateId.BootstrapEnd)
+        {
+            action?.Invoke();
+            return;
+        }
+        
         Game.Gsm.OnAfterStateChange += OnBootstrapEnd;
         void OnBootstrapEnd(StateChangeRecord<GameStateId> record)
         {
@@ -86,6 +94,8 @@ public class GameEntry : MonoBehaviour
                 return;
             
             Game.Gsm.OnAfterStateChange -= OnBootstrapEnd;
+            
+            action?.Invoke();
         }
     }
 }
