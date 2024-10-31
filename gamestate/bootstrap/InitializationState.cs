@@ -25,6 +25,6 @@ namespace cfUnityEngine.GameState.Bootstrap
             });
         }
 
-        public partial Task Initialize();
+        private partial Task Initialize();
     }
 }
