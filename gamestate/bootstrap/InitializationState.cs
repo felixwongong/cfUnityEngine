@@ -16,7 +16,7 @@ namespace cfUnityEngine.GameState.Bootstrap
             {
                 if (t.IsCompletedSuccessfully)
                 {
-                    gsm.GoToState(GameStateId.BootstrapEnd);
+                    gsm.TryGoToState(GameStateId.BootstrapEnd);
                 }
                 else
                 {

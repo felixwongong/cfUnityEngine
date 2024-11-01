@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
 using cfEngine.Logging;
 using cfEngine.Util;
 using UnityEngine;
@@ -84,20 +83,57 @@ namespace cfUnityEngine.Util
             return TryGetState(id, out _) && (_currentState == null || _currentState.Whitelist.Contains(id));
         }
 
-        public void GoToState(TStateId nextStateId, in StateParam param = null, bool checkWhitelist = true)
+        public bool TryGoToState(TStateId nextStateId, in StateParam param = null)
         {
             try
             {
                 if (!TryGetState(nextStateId, out var nextState))
                 {
                     Log.LogException(new KeyNotFoundException($"State {nextStateId} not registered"));
-                    return;
+                    return false;
                 }
 
-                if (checkWhitelist && !CanGoToState(nextState.Id))
+                if (!CanGoToState(nextState.Id))
                 {
                     Log.LogException(new ArgumentException(
                         $"Cannot go to state {nextState.Id}, not in current state {_currentState.Id} whitelist"));
+                    return false;
+                }
+
+                if (_currentState != null)
+                {
+                    OnBeforeStateChange?.Invoke(new StateChangeRecord<TStateId>
+                        { LastState = _currentState.Id, NewState = nextState.Id });
+
+                    _currentState.OnEndContext();
+                    _currentState.enabled = false;
+                    _lastState = _currentState;
+                }
+
+                _currentState = nextState;
+                _currentState.enabled = true;
+                if (_lastState != null)
+                {
+                    OnAfterStateChange?.Invoke(new StateChangeRecord<TStateId>
+                        { LastState = _lastState.Id, NewState = _currentState.Id });
+                }
+                _currentState.StartContext((TStateMachine)this, param);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Log.LogException(new StateExecutionException<TStateId>(nextStateId, ex));
+                return false;
+            }
+        }
+
+        public void ForceGoToState(TStateId nextStateId, in StateParam param = null)
+        {
+            try
+            {
+                if (!TryGetState(nextStateId, out var nextState))
+                {
+                    Log.LogException(new KeyNotFoundException($"State {nextStateId} not registered"));
                     return;
                 }
 
@@ -126,7 +162,7 @@ namespace cfUnityEngine.Util
             }
         }
 
-        public TState GetState(TStateId id)
+        public TState GetStateUnsafe(TStateId id)
         {
             if (!_stateDictionary.TryGetValue(id, out var state))
             {
@@ -137,9 +173,9 @@ namespace cfUnityEngine.Util
             return state;
         }
 
-        public T GetState<T>(TStateId id) where T : TState
+        public T GetStateUnsafe<T>(TStateId id) where T : TState
         {
-            return (T)GetState(id);
+            return (T)GetStateUnsafe(id);
         }
 
         public bool TryGetState(TStateId id, out TState monoState)

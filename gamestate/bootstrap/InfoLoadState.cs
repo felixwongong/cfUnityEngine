@@ -21,7 +21,7 @@ namespace cfUnityEngine.GameState.Bootstrap
             var infoLoadTasks = Game.Info.InfoMap.Values.Select(info => info.LoadSerializedAsync(Game.TaskToken));
             Task.WhenAll(infoLoadTasks).ContinueWith(t =>
             {
-                gsm.GoToState(GameStateId.Login, new LoginState.Param()
+                gsm.TryGoToState(GameStateId.Login, new LoginState.Param()
                 {
                     Platform = LoginPlatform.Local,
                     Token = new LoginToken()

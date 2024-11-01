@@ -70,7 +70,7 @@ public class GameEntry : MonoBehaviour
             Game.Dispose();
         }
         
-        Game.Gsm.GoToState(GameStateId.InfoLoad);
+        Game.Gsm.TryGoToState(GameStateId.InfoLoad);
     }
 
     private static void OnStateChanged(StateChangeRecord<GameStateId> record)

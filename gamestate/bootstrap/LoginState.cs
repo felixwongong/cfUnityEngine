@@ -33,11 +33,11 @@ namespace cfUnityEngine.GameState.Bootstrap
                 {
                     if (task.Result)
                     {
-                        gsm.GoToState(GameStateId.UserDataLoad);
+                        gsm.TryGoToState(GameStateId.UserDataLoad);
                     }
                     else
                     {
-                        gsm.GoToState(GameStateId.Login, new Param()
+                        gsm.TryGoToState(GameStateId.Login, new Param()
                         {
                             Platform = LoginPlatform.Local,
                         });
