@@ -81,6 +81,11 @@ public class GameEntry : MonoBehaviour
     [Conditional("UNITY_EDITOR")]
     public static void RegisterEditorPostBootstrapAction([NotNull] Action action)
     {
+        RegisterPostBootstrapAction(action);
+    }
+
+    private static void RegisterPostBootstrapAction(Action action)
+    {
         if (Game.Gsm.CurrentStateId > GameStateId.BootstrapEnd)
         {
             action?.Invoke();
