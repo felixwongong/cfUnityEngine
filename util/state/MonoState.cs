@@ -23,6 +23,11 @@ namespace cfUnityEngine.Util
 
         public virtual void _Update() { }
 
+        public virtual bool IsReady()
+        {
+            return true;
+        }
+        
         protected internal abstract void StartContext(TStateMachine sm, StateParam param);
 
         protected internal virtual void OnEndContext()
