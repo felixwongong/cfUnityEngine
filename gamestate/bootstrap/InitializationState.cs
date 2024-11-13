@@ -10,13 +10,13 @@ namespace cfUnityEngine.GameState.Bootstrap
         public override HashSet<GameStateId> Whitelist { get; } = new() { GameStateId.BootstrapEnd };
         public override GameStateId Id => GameStateId.Initialization;
 
-        protected internal override void StartContext(GameStateMachine gsm, StateParam param)
+        protected internal override void StartContext(StateParam stateParam)
         {
             Initialize().ContinueWith(t =>
             {
                 if (t.IsCompletedSuccessfully)
                 {
-                    gsm.TryGoToState(GameStateId.BootstrapEnd);
+                    StateMachine.TryGoToState(GameStateId.BootstrapEnd);
                 }
                 else
                 {

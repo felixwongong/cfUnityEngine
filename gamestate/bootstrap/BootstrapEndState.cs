@@ -5,7 +5,7 @@ namespace cfUnityEngine.GameState.Bootstrap
     public class BootstrapEndState: GameState
     {
         public override GameStateId Id => GameStateId.BootstrapEnd;
-        protected internal override void StartContext(GameStateMachine gsm, StateParam param)
+        protected internal override void StartContext(StateParam stateParam)
         {
         }
     }

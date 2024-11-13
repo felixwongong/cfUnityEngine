@@ -10,6 +10,8 @@ namespace cfUnityEngine.Util
     {
         public abstract TStateId Id { get; }
         public virtual HashSet<TStateId> Whitelist { get; } = new HashSet<TStateId>();
+        
+        public TStateMachine StateMachine { get; internal set; }
 
         private void Awake() { }
 
@@ -23,12 +25,9 @@ namespace cfUnityEngine.Util
 
         public virtual void _Update() { }
 
-        public virtual bool IsReady()
-        {
-            return true;
-        }
+        public virtual bool IsReady() => true;
         
-        protected internal abstract void StartContext(TStateMachine sm, StateParam param);
+        protected internal abstract void StartContext(StateParam param);
 
         protected internal virtual void OnEndContext()
         {

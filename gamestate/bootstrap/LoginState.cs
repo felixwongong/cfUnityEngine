@@ -18,7 +18,7 @@ namespace cfUnityEngine.GameState.Bootstrap
 
         public override GameStateId Id => GameStateId.Login;
 
-        protected internal override void StartContext(GameStateMachine gsm, StateParam stateParam)
+        protected internal override void StartContext(StateParam stateParam)
         {
             if (stateParam is not Param p)
             {
@@ -33,11 +33,11 @@ namespace cfUnityEngine.GameState.Bootstrap
                 {
                     if (task.Result)
                     {
-                        gsm.TryGoToState(GameStateId.UserDataLoad);
+                        StateMachine.TryGoToState(GameStateId.UserDataLoad);
                     }
                     else
                     {
-                        gsm.TryGoToState(GameStateId.Login, new Param()
+                        StateMachine.TryGoToState(GameStateId.Login, new Param()
                         {
                             Platform = LoginPlatform.Local,
                         });

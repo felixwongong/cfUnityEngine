@@ -9,13 +9,13 @@ namespace cfUnityEngine.GameState.Bootstrap
 
         public override GameStateId Id => GameStateId.UserDataLoad;
 
-        protected internal override void StartContext(GameStateMachine gsm, StateParam param)
+        protected internal override void StartContext(StateParam stateParam)
         {
             Game.UserData.LoadInitializeAsync(Game.TaskToken).ContinueWith(t =>
             {
                 if (t.IsCompletedSuccessfully)
                 {
-                    gsm.TryGoToState(GameStateId.Initialization);
+                    StateMachine.TryGoToState(GameStateId.Initialization);
                 }
             });
         }

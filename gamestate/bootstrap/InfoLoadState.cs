@@ -11,7 +11,7 @@ namespace cfUnityEngine.GameState.Bootstrap
         public override HashSet<GameStateId> Whitelist { get; } = new() { GameStateId.Login };
         public override GameStateId Id => GameStateId.InfoLoad;
 
-        protected internal override void StartContext(GameStateMachine gsm, StateParam param)
+        protected internal override void StartContext(StateParam stateParam)
         {
             foreach (var info in InfoLayer.infos)
             {
@@ -21,7 +21,7 @@ namespace cfUnityEngine.GameState.Bootstrap
             var infoLoadTasks = Game.Info.InfoMap.Values.Select(info => info.LoadSerializedAsync(Game.TaskToken));
             Task.WhenAll(infoLoadTasks).ContinueWith(t =>
             {
-                gsm.TryGoToState(GameStateId.Login, new LoginState.Param()
+                StateMachine.TryGoToState(GameStateId.Login, new LoginState.Param()
                 {
                     Platform = LoginPlatform.Local,
                     Token = new LoginToken()
