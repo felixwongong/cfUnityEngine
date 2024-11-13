@@ -12,7 +12,8 @@ public class CfFeatureSettingEditor : EditorWindow
     private static readonly string[] FEATURES = new[]
     {
         "CF_ADDRESSABLE",
-        "CF_STATISTIC"
+        "CF_STATISTIC",
+        "CF_INVENTORY"
     };
 
     [MenuItem("Cf Tools/Feature Setting")]
