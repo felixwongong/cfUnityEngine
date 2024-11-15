@@ -27,9 +27,12 @@ public class CfFeatureSettingEditor : EditorWindow
 
     public void CreateGUI()
     {
+        featureBuildTargets.Clear();
+        
         InitBuildTargetSymbols();
         void InitBuildTargetSymbols()
         {
+            featureBuildTargets.Capacity = FEATURES.Length;
             foreach (var feature in FEATURES)
             {
                 featureBuildTargets.Add((feature, BuildTargetType.None));
@@ -45,10 +48,6 @@ public class CfFeatureSettingEditor : EditorWindow
                 {
                     var (feature, buildTargetType) = featureBuildTargets[i];
                     if (symbols.Contains(feature))
-                    {
-                        featureBuildTargets[i] = (feature, buildTargetType ^ buildTarget);
-                    }
-                    else
                     {
                         featureBuildTargets[i] = (feature, buildTargetType ^ buildTarget);
                     }
