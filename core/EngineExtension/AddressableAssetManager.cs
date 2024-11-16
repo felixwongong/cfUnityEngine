@@ -19,7 +19,7 @@ namespace cfEngine.Asset
             return new AssetHandle<T>(handle.Result, handle.Release);
         }
 
-        protected override Task<AssetHandle<T>> _LoadAsync<T>(string key, CancellationToken token)
+        protected override Task<AssetHandle<T>> _LoadAsync<T>(string key, CancellationToken token = default)
         {
             var handle = Addressables.LoadAssetAsync<T>(key);
             
