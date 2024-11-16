@@ -1,9 +1,11 @@
+    using System;
     using UnityEngine;
 
     public abstract class MonoInstance<T> : MonoBehaviour where T : Component
     {
         public virtual bool persistent => false;
-        
+        public static Func<T> createMethod => () => new GameObject($"_{typeof(T).Name}").AddComponent<T>();
+
         private static T _instance;
         public static T Instance
         {
@@ -14,8 +16,8 @@
                 _instance = FindAnyObjectByType<T>();
 
                 if (_instance != null) return _instance;
-                
-                _instance = new GameObject($"_{typeof(T).Name}").AddComponent<T>();
+
+                _instance = createMethod();
                 return _instance;
             }
         }
