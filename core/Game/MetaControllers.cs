@@ -1,4 +1,5 @@
 using System;
+using cfEngine.Meta.Inventory;
 
 namespace cfEngine.Meta
 {
