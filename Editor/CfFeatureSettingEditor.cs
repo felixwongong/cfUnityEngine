@@ -25,46 +25,34 @@ namespace cfUnityEngine.Editor
             wnd.titleContent = new GUIContent("CfFeatureSettingEditor");
         }
 
-        private List<(FeatureStr feature, BuildTargetType buildTarget)> featureBuildTargets = new();
+        private List<(FeatureStr feature, PlatformType buildTarget)> platformSymbols = new();
 
         public void CreateGUI()
         {
-            featureBuildTargets.Clear();
+            platformSymbols.Clear();
 
             InitBuildTargetSymbols();
 
             void InitBuildTargetSymbols()
             {
-                featureBuildTargets.Capacity = FEATURES.Length;
+                platformSymbols.Capacity = FEATURES.Length;
                 foreach (var feature in FEATURES)
                 {
-                    featureBuildTargets.Add((feature, BuildTargetType.None));
+                    platformSymbols.Add((feature, PlatformType.None));
                 }
 
-                void InitBuildTargetSymbols()
+                foreach (var platformType in (PlatformType[])Enum.GetValues(typeof(PlatformType)))
                 {
-                    foreach (var feature in FEATURES)
+                    if (platformType == PlatformType.None) continue;
+
+                    PlayerSettings.GetScriptingDefineSymbols(platformType.GetNamed(), out var definedSymbols);
+
+                    for (var i = 0; i < platformSymbols.Count; i++)
                     {
-                        featureBuildTargets.Add((feature, BuildTargetType.None));
-                    }
-
-                    foreach (var buildTarget in (BuildTargetType[])Enum.GetValues(typeof(BuildTargetType)))
-                    {
-                        if (buildTarget == BuildTargetType.None) continue;
-
-                        PlayerSettings.GetScriptingDefineSymbols(buildTarget.GetNamed(), out var symbols);
-
-                        for (var i = 0; i < featureBuildTargets.Count; i++)
+                        var (featureSymbol, platformFlag) = platformSymbols[i];
+                        if (definedSymbols.Contains(featureSymbol))
                         {
-                            var (feature, buildTargetType) = featureBuildTargets[i];
-                            if (symbols.Contains(feature))
-                            {
-                                featureBuildTargets[i] = (feature, buildTargetType ^ buildTarget);
-                            }
-                            else
-                            {
-                                featureBuildTargets[i] = (feature, buildTargetType ^ buildTarget);
-                            }
+                            platformSymbols[i] = (featureSymbol, platformFlag ^ platformType);
                         }
                     }
                 }
@@ -73,23 +61,23 @@ namespace cfUnityEngine.Editor
                 VisualElement root = rootVisualElement;
                 var applyButton = new Button(() =>
                 {
-                    foreach (var buildTarget in (BuildTargetType[])Enum.GetValues(typeof(BuildTargetType)))
+                    foreach (var platformType in (PlatformType[])Enum.GetValues(typeof(PlatformType)))
                     {
-                        if (buildTarget == BuildTargetType.None) continue;
-                        var features = featureBuildTargets
+                        if (platformType == PlatformType.None) continue;
+                        var features = platformSymbols
                             .Where(x =>
                             {
-                                var hasFlag = ((BuildTargetType)x.buildTarget).HasFlag(buildTarget);
+                                var hasFlag = ((PlatformType)x.buildTarget).HasFlag(platformType);
                                 return hasFlag;
                             })
                             .Select(x => x.feature).ToArray();
-                        PlayerSettings.SetScriptingDefineSymbols(buildTarget.GetNamed(), features);
+                        PlayerSettings.SetScriptingDefineSymbols(platformType.GetNamed(), features);
                     }
                 });
                 applyButton.text = "Apply";
                 root.Add(applyButton);
 
-                var settingList = new ListView(featureBuildTargets);
+                var settingList = new ListView(platformSymbols);
                 root.Add(settingList);
 
                 settingList.makeItem = () => new ToggleButtonGroup()
@@ -106,21 +94,21 @@ namespace cfUnityEngine.Editor
                         return;
                     }
 
-                    foreach (var buildTarget in (BuildTargetType[])Enum.GetValues(typeof(BuildTargetType)))
+                    foreach (var platformType in (PlatformType[])Enum.GetValues(typeof(PlatformType)))
                     {
-                        if (buildTarget == BuildTargetType.None) continue;
+                        if (platformType == PlatformType.None) continue;
 
                         var button = new Button(() =>
                         {
-                            var (feature, target) = featureBuildTargets[idx];
-                            featureBuildTargets[idx] = (feature, target ^ buildTarget);
+                            var (featureSymbol, platformFlag) = platformSymbols[idx];
+                            platformSymbols[idx] = (featureSymbol, platformFlag ^ platformType);
                         });
-                        button.text = buildTarget.GetNamed().TargetName;
+                        button.text = platformType.GetNamed().TargetName;
                         toggleGroup.Add(button);
                     }
 
-                    toggleGroup.label = featureBuildTargets[idx].feature;
-                    toggleGroup.value = ToggleButtonGroupState.FromEnumFlags(featureBuildTargets[idx].buildTarget);
+                    toggleGroup.label = platformSymbols[idx].feature;
+                    toggleGroup.value = ToggleButtonGroupState.FromEnumFlags(platformSymbols[idx].buildTarget);
                 };
             }
         }

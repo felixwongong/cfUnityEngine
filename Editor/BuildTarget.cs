@@ -4,7 +4,7 @@ using UnityEditor.Build;
 namespace cfUnityEngine.Editor
 {
     [Flags]
-    public enum BuildTargetType
+    public enum PlatformType
     {
         None = 0,
         Android = 1 << 0,
@@ -15,14 +15,14 @@ namespace cfUnityEngine.Editor
 
     public static class BuildTargetTypeExtension
     {
-        public static NamedBuildTarget GetNamed(this BuildTargetType targetType)
+        public static NamedBuildTarget GetNamed(this PlatformType targetType)
         {
             return targetType switch
             {
-                BuildTargetType.Standalone => NamedBuildTarget.Standalone,
-                BuildTargetType.Android => NamedBuildTarget.Android,
-                BuildTargetType.IOS => NamedBuildTarget.iOS,
-                BuildTargetType.WebGL => NamedBuildTarget.WebGL,
+                PlatformType.Standalone => NamedBuildTarget.Standalone,
+                PlatformType.Android => NamedBuildTarget.Android,
+                PlatformType.IOS => NamedBuildTarget.iOS,
+                PlatformType.WebGL => NamedBuildTarget.WebGL,
                 _ => throw new ArgumentOutOfRangeException(nameof(targetType), targetType, null)
             };
         }
