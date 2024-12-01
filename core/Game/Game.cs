@@ -43,11 +43,11 @@ public partial class Game
 
     public static void Dispose()
     {
-        Info?.Dispose();
-        Asset?.Dispose();
-        Pool?.Dispose();
-        Gsm?.Dispose();
-        Auth?.Dispose();
-        Meta?.Dispose();
+        Info?.Dispose(); Info = null;
+        Asset?.Dispose(); Asset = null;
+        Pool?.Dispose(); Pool = null;
+        Gsm?.Dispose(); Gsm = null;
+        Auth?.Dispose(); Auth = null;
+        Meta?.Dispose(); Meta = null;
     }
 }
