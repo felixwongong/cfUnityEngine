@@ -36,15 +36,22 @@ namespace cfUnityEngine.Editor
             }
             else
             {
-                var collectionMap = CollectionEventsBase.Debug.Instance.RecordedCollectionSubscriptionId;
-                var collectionList = collectionMap.Keys.ToList();
+                var collectionMap = _RtDebug.Instance.Collections;
+                var collectionList = collectionMap.ToList();
 
                 tabList.itemsSource = collectionList;
                 tabList.makeItem = () => new Button();
                 tabList.bindItem = (item, index) =>
                 {
                     var button = (Button)item;
-                    button.text = collectionList[index];
+                    if (collectionList[index].Value.TryGetTarget(out var collection))
+                    {
+                        button.text = collection.GetType().GetTypeName();
+                    }
+                    else
+                    {
+                        collectionList.RemoveAt(index);
+                    }
                 };
             }
             
