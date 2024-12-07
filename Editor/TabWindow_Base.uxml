@@ -1,5 +1,6 @@
 <engine:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:engine="UnityEngine.UIElements" xmlns:editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
     <engine:VisualElement name="root" style="flex-grow: 1; flex-direction: row;">
-        <engine:ListView name="tab-list" style="max-width: 200px; width: 30%; flex-grow: 1;" />
+        <engine:ListView name="tab-list" style="max-width: initial; width: 30%;" />
+        <engine:VisualElement name="tab-content" style="flex-grow: 1; width: 70%;" />
     </engine:VisualElement>
 </engine:UXML>
