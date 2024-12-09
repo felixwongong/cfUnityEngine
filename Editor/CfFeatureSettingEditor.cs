@@ -15,7 +15,8 @@ namespace cfUnityEngine.Editor
             "CF_ADDRESSABLE",
             "CF_STATISTIC",
             "CF_INVENTORY",
-            "CF_REACTIVE"
+            "CF_REACTIVE",
+            "CF_REACTIVE_DEBUG"
         };
 
         [MenuItem("Cf Tools/Feature Setting")]
