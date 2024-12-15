@@ -1,0 +1,11 @@
+<engine:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:engine="UnityEngine.UIElements" xmlns:editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <engine:VisualElement template="TabWindow_Base" style="flex-grow: 1; width: 100%; height: 100%; position: absolute;">
+        <engine:VisualElement name="root" style="flex-grow: 1; flex-direction: row;">
+            <engine:ListView name="tab-list" style="max-width: initial; width: 30%;" />
+            <engine:VisualElement name="tab-content" style="flex-grow: 1; width: 70%;">
+                <engine:VisualElement name="collection-info" style="flex-grow: 0.2;" />
+                <engine:ListView name="subscription-list" style="flex-grow: 0.8;" />
+            </engine:VisualElement>
+        </engine:VisualElement>
+    </engine:VisualElement>
+</engine:UXML>
