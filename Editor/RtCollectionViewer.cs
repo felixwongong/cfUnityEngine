@@ -27,6 +27,40 @@ namespace cfUnityEngine.Editor
         {
             var visualTreeRoot = _visualTreeAsset.CloneTree();
             rootVisualElement.Add(visualTreeRoot);
+            visualTreeRoot.StretchToParentSize();
+
+            var tabList = visualTreeRoot.Q<ListView>("tab-list");
+            var rootCollectionIds = _RtDebug.Instance.GetRootCollectionIds();
+            tabList.itemsSource = rootCollectionIds;
+            tabList.makeItem = () => new Button();
+            tabList.bindItem = (e, i) =>
+            {
+                var button = (Button) e;
+                var collectionId = (Guid)rootCollectionIds[i];
+                if(_RtDebug.Instance.Collections.TryGetValue(collectionId, out var collectionRef))
+                {
+                    if (collectionRef.TryGetTarget(out var collection))
+                    {
+                        button.text = collection.__GetDebugTitle();
+                        button.clickable.clicked += () =>
+                        {
+                            if (_RtDebug.Instance.TryGetMutatedReferences(collectionId, out var mutatedIds))
+                            {
+                                Debug.Log(string.Join(',', mutatedIds));
+                            }
+                        };
+                    }
+                    else
+                    {
+                        button.text = "DisposedCollection";
+                    }
+                }
+                else
+                {
+                    button.text = "Collection not found";
+                }
+                
+            };
         }
     }
 }
