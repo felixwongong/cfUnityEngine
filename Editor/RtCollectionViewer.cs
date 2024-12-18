@@ -11,7 +11,7 @@ using UnityEngine.UIElements;
 
 namespace cfUnityEngine.Editor
 {
-    public class RtCollectionViewer: EditorWindow
+    public class RtCollectionViewer : EditorWindow
     {
         [SerializeField] private VisualTreeAsset _visualTreeAsset;
 
@@ -19,7 +19,7 @@ namespace cfUnityEngine.Editor
         private ListView _subscriptionList;
         private Label _currentCollectionLabel;
 
-        private Guid currentCollectionId;
+        private Guid _currentCollectionId;
 
         [MenuItem("Cf Tools/Rt Collection Viewer")]
         public static void ShowPanel()
@@ -37,6 +37,20 @@ namespace cfUnityEngine.Editor
             _tabList = visualTreeRoot.Q<ListView>("tab-list");
             _currentCollectionLabel = visualTreeRoot.Q<Label>("current-collection-label");
             var backButton = visualTreeRoot.Q<Button>("back-button");
+            backButton.clicked += () =>
+            {
+                if (!TryGetCollection(_currentCollectionId, out var currentCollection) || currentCollection.__GetSourceId() == Guid.Empty)
+                {
+                    _currentCollectionLabel.text = string.Empty;
+                    _currentCollectionId = Guid.Empty;
+                    DrawCollectionTabs(_RtDebug.Instance.GetRootCollectionIds());
+                }
+                else
+                {
+                    _currentCollectionId = currentCollection.__GetSourceId();
+                    RedrawCurrentCollection();
+                }
+            };
 
             var rootCollectionIds = _RtDebug.Instance.GetRootCollectionIds();
             DrawCollectionTabs(rootCollectionIds);
@@ -44,11 +58,11 @@ namespace cfUnityEngine.Editor
 
         private void RedrawCurrentCollection()
         {
-            if (_RtDebug.Instance.Collections.TryGetValue(currentCollectionId, out var collectionRef) && collectionRef.TryGetTarget(out var currentCollection))
+            if (TryGetCollection(_currentCollectionId, out var currentCollection))
             {
                 _currentCollectionLabel.text = currentCollection.__GetDebugTitle();
-                
-                if(_RtDebug.Instance.TryGetMutatedReferences(currentCollectionId, out var mutatedCollectionIds))
+
+                if (_RtDebug.Instance.TryGetMutatedReferences(_currentCollectionId, out var mutatedCollectionIds))
                 {
                     DrawCollectionTabs(mutatedCollectionIds);
                 }
@@ -61,21 +75,27 @@ namespace cfUnityEngine.Editor
 
         private void DrawCollectionTabs(IList collectionIds)
         {
+            if (collectionIds is not { Count: > 0 })
+            {
+                _tabList.itemsSource = null;
+                return;
+            }
+            
             _tabList.itemsSource = collectionIds;
             _tabList.makeItem = () => new Button();
             _tabList.bindItem = (e, i) =>
             {
-                var button = (Button) e;
+                var button = (Button)e;
                 var collectionId = (Guid)collectionIds[i];
-                if(_RtDebug.Instance.Collections.TryGetValue(collectionId, out var collectionRef))
+                if (_RtDebug.Instance.Collections.TryGetValue(collectionId, out var collectionRef))
                 {
                     if (collectionRef.TryGetTarget(out var collection))
                     {
                         button.text = collection.__GetDebugTitle();
                         button.clickable.clicked += () =>
                         {
-                            currentCollectionId = collectionId;
-                            
+                            _currentCollectionId = collectionId;
+
                             RedrawCurrentCollection();
                         };
                     }
@@ -91,11 +111,18 @@ namespace cfUnityEngine.Editor
             };
         }
 
-        private void UpdateBackButtonEnable()
+        private bool TryGetCollection(Guid collectionId, out ICollectionDebug collection)
         {
-            if (currentCollectionId == Guid.Empty)
+            if (_RtDebug.Instance.Collections.TryGetValue(collectionId, out var collectionRef))
             {
+                if (collectionRef.TryGetTarget(out collection))
+                {
+                    return true;
+                }
             }
+
+            collection = null;
+            return false;
         }
     }
 }
