@@ -1,5 +1,6 @@
 #if CF_REACTIVE_DEBUG
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using cfEngine.Rt;
@@ -14,7 +15,11 @@ namespace cfUnityEngine.Editor
     {
         [SerializeField] private VisualTreeAsset _visualTreeAsset;
 
-        private ListView subscriptionList;
+        private ListView _tabList;
+        private ListView _subscriptionList;
+        private Label _currentCollectionLabel;
+
+        private Guid currentCollectionId;
 
         [MenuItem("Cf Tools/Rt Collection Viewer")]
         public static void ShowPanel()
@@ -29,14 +34,39 @@ namespace cfUnityEngine.Editor
             rootVisualElement.Add(visualTreeRoot);
             visualTreeRoot.StretchToParentSize();
 
-            var tabList = visualTreeRoot.Q<ListView>("tab-list");
+            _tabList = visualTreeRoot.Q<ListView>("tab-list");
+            _currentCollectionLabel = visualTreeRoot.Q<Label>("current-collection-label");
+            var backButton = visualTreeRoot.Q<Button>("back-button");
+
             var rootCollectionIds = _RtDebug.Instance.GetRootCollectionIds();
-            tabList.itemsSource = rootCollectionIds;
-            tabList.makeItem = () => new Button();
-            tabList.bindItem = (e, i) =>
+            DrawCollectionTabs(rootCollectionIds);
+        }
+
+        private void RedrawCurrentCollection()
+        {
+            if (_RtDebug.Instance.Collections.TryGetValue(currentCollectionId, out var collectionRef) && collectionRef.TryGetTarget(out var currentCollection))
+            {
+                _currentCollectionLabel.text = currentCollection.__GetDebugTitle();
+                
+                if(_RtDebug.Instance.TryGetMutatedReferences(currentCollectionId, out var mutatedCollectionIds))
+                {
+                    DrawCollectionTabs(mutatedCollectionIds);
+                }
+                else
+                {
+                    DrawCollectionTabs(new List<Guid>());
+                }
+            }
+        }
+
+        private void DrawCollectionTabs(IList collectionIds)
+        {
+            _tabList.itemsSource = collectionIds;
+            _tabList.makeItem = () => new Button();
+            _tabList.bindItem = (e, i) =>
             {
                 var button = (Button) e;
-                var collectionId = (Guid)rootCollectionIds[i];
+                var collectionId = (Guid)collectionIds[i];
                 if(_RtDebug.Instance.Collections.TryGetValue(collectionId, out var collectionRef))
                 {
                     if (collectionRef.TryGetTarget(out var collection))
@@ -44,10 +74,9 @@ namespace cfUnityEngine.Editor
                         button.text = collection.__GetDebugTitle();
                         button.clickable.clicked += () =>
                         {
-                            if (_RtDebug.Instance.TryGetMutatedReferences(collectionId, out var mutatedIds))
-                            {
-                                Debug.Log(string.Join(',', mutatedIds));
-                            }
+                            currentCollectionId = collectionId;
+                            
+                            RedrawCurrentCollection();
                         };
                     }
                     else
@@ -59,8 +88,14 @@ namespace cfUnityEngine.Editor
                 {
                     button.text = "Collection not found";
                 }
-                
             };
+        }
+
+        private void UpdateBackButtonEnable()
+        {
+            if (currentCollectionId == Guid.Empty)
+            {
+            }
         }
     }
 }
