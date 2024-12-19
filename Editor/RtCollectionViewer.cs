@@ -36,6 +36,8 @@ namespace cfUnityEngine.Editor
 
             _tabList = visualTreeRoot.Q<ListView>("tab-list");
             _currentCollectionLabel = visualTreeRoot.Q<Label>("current-collection-label");
+            _subscriptionList = visualTreeRoot.Q<ListView>("subscription-list");
+            
             var backButton = visualTreeRoot.Q<Button>("back-button");
             backButton.clicked += () =>
             {

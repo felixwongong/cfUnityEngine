@@ -1,16 +1,23 @@
 <engine:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:engine="UnityEngine.UIElements" xmlns:editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/Prefab/UI/CommonStyle.uss?fileID=7433441132597879392&amp;guid=3a07ea27fb6d2a44bb2e70002296d853&amp;type=3#CommonStyle" />
     <engine:VisualElement template="TabWindow_Base" style="flex-grow: 1; width: 100%; height: 100%; position: absolute;">
         <engine:VisualElement name="root" style="flex-grow: 1; flex-direction: row;">
             <engine:VisualElement name="left" style="flex-grow: 1; width: 30%;">
-                <engine:VisualElement style="margin-bottom: 50px;">
-                    <engine:Button text="back" name="back-button" />
-                    <engine:Label text="Label" name="current-collection-label" style="-unity-text-align: upper-center;" />
+                <engine:VisualElement style="margin-bottom: 10%; flex-direction: row;">
+                    <engine:Button name="back-button" icon-image="project://database/Assets/Prefab/UI/DefaultTheme.tss?fileID=-3753015318093942961&amp;guid=7ec9fb96f0a34cc4a9e56872db61b7a5&amp;type=3#arrow-left" />
+                    <engine:Label text="Label" name="current-collection-label" style="-unity-text-align: middle-center; flex-grow: 1; font-size: 10%;" />
                 </engine:VisualElement>
                 <engine:ListView name="tab-list" style="max-width: initial; width: auto; flex-grow: 1;" />
             </engine:VisualElement>
             <engine:VisualElement name="tab-content" style="flex-grow: 1; width: 70%;">
-                <engine:VisualElement name="collection-info" style="flex-grow: 0.2;" />
-                <engine:ListView name="subscription-list" style="flex-grow: 0.8;" />
+                <engine:TabView style="flex-grow: 1; align-items: center;">
+                    <engine:Tab label="Subscription" name="Subscription">
+                        <engine:VisualElement style="flex-grow: 1;">
+                            <engine:ListView name="subscription-list" style="flex-grow: 1;" />
+                        </engine:VisualElement>
+                    </engine:Tab>
+                    <engine:Tab label="Content" name="Content" />
+                </engine:TabView>
             </engine:VisualElement>
         </engine:VisualElement>
     </engine:VisualElement>
