@@ -72,6 +72,8 @@ namespace cfUnityEngine.Editor
                 {
                     DrawCollectionTabs(new List<Guid>());
                 }
+                
+                DrawSubscriptions(currentCollection);
             }
         }
 
@@ -94,12 +96,15 @@ namespace cfUnityEngine.Editor
                     if (collectionRef.TryGetTarget(out var collection))
                     {
                         button.text = collection.__GetDebugTitle();
-                        button.clickable.clicked += () =>
-                        {
-                            _currentCollectionId = collectionId;
+                        button.clickable.clicked += OnButtonClickedOnce;
 
+                        void OnButtonClickedOnce()
+                        {
+                            button.clickable.clicked -= OnButtonClickedOnce;
+                            
+                            _currentCollectionId = collectionId;
                             RedrawCurrentCollection();
-                        };
+                        }
                     }
                     else
                     {
@@ -111,6 +116,29 @@ namespace cfUnityEngine.Editor
                     button.text = "Collection not found";
                 }
             };
+        }
+        
+        private void DrawSubscriptions(ICollectionDebug collection)
+        {
+            if (_RtDebug.Instance.CollectionSubs.TryGetValue(collection.__GetId(), out var subscriptionMap))
+            {
+                var subscriptions = subscriptionMap.Values.ToList();
+                _subscriptionList.itemsSource = subscriptions.ToList();
+                _subscriptionList.makeItem = () => new Label();
+                _subscriptionList.bindItem = (e, i) =>
+                {
+                    var label = (Label)e;
+                    var subscriptionRef = subscriptions.ToList()[i];
+                    if (subscriptionRef.TryGetTarget(out var subscription))
+                    {
+                        label.text = subscription.__GetDebugTitle();
+                    }
+                    else
+                    {
+                        label.text = "Disposed Subscription";
+                    }
+                };
+            }
         }
 
         private bool TryGetCollection(Guid collectionId, out ICollectionDebug collection)
