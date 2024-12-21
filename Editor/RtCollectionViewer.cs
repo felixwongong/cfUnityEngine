@@ -84,7 +84,9 @@ namespace cfUnityEngine.Editor
                 _tabList.itemsSource = null;
                 return;
             }
-            
+
+            var unsubscribeList = new List<Action>();
+
             _tabList.itemsSource = collectionIds;
             _tabList.makeItem = () => new Button();
             _tabList.bindItem = (e, i) =>
@@ -97,11 +99,10 @@ namespace cfUnityEngine.Editor
                     {
                         button.text = collection.__GetDebugTitle();
                         button.clickable.clicked += OnButtonClickedOnce;
+                        unsubscribeList.Add(() => button.clickable.clicked -= OnButtonClickedOnce);
 
                         void OnButtonClickedOnce()
                         {
-                            button.clickable.clicked -= OnButtonClickedOnce;
-                            
                             _currentCollectionId = collectionId;
                             RedrawCurrentCollection();
                         }
@@ -115,6 +116,15 @@ namespace cfUnityEngine.Editor
                 {
                     button.text = "Collection not found";
                 }
+            };
+            
+            _tabList.unbindItem = (e, i) =>
+            {
+                foreach (var action in unsubscribeList)
+                {
+                    action?.Invoke();
+                }
+                unsubscribeList.Clear();
             };
         }
         
