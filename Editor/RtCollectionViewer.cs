@@ -53,6 +53,26 @@ namespace cfUnityEngine.Editor
                     RedrawCurrentCollection();
                 }
             };
+            
+            var disposeButton = visualTreeRoot.Q<Button>("dispose-button");
+            disposeButton.clicked += ()　=>
+            {
+                if (TryGetCollection(_currentCollectionId, out var currentCollection))
+                {
+                    currentCollection.Dispose();
+                    _currentCollectionId = currentCollection.__GetSourceId();
+                    if (_currentCollectionId.Equals(Guid.Empty))
+                    {
+                        DrawCollectionTabs(_RtDebug.Instance.GetRootCollectionIds());
+                    }
+                    else
+                    {
+                        RedrawCurrentCollection();
+                    }
+                    
+                    GC.Collect();
+                }
+            };
 
             var rootCollectionIds = _RtDebug.Instance.GetRootCollectionIds();
             DrawCollectionTabs(rootCollectionIds);
@@ -148,6 +168,10 @@ namespace cfUnityEngine.Editor
                         label.text = "Disposed Subscription";
                     }
                 };
+            }
+            else
+            {
+                _subscriptionList.itemsSource = null;
             }
         }
 
