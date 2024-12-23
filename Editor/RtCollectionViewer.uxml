@@ -16,7 +16,11 @@
                             <engine:ListView name="subscription-list" style="flex-grow: 1;" />
                         </engine:VisualElement>
                     </engine:Tab>
-                    <engine:Tab label="Content" name="Content" style="margin-top: 0; border-top-width: 1px; border-left-color: rgb(0, 0, 0); border-right-color: rgb(0, 0, 0); border-top-color: rgb(0, 0, 0); border-bottom-color: rgb(0, 0, 0); margin-right: 0; margin-bottom: 0; margin-left: 0;" />
+                    <engine:Tab label="Content" name="Content" style="margin-top: 0; border-top-width: 1px; border-left-color: rgb(0, 0, 0); border-right-color: rgb(0, 0, 0); border-top-color: rgb(0, 0, 0); border-bottom-color: rgb(0, 0, 0); margin-right: 0; margin-bottom: 0; margin-left: 0; padding-top: 3%; padding-right: 2%; padding-bottom: 3%; padding-left: 2%;">
+                        <engine:VisualElement style="flex-grow: 1;">
+                            <engine:ListView name="content-list" style="flex-grow: 1;" />
+                        </engine:VisualElement>
+                    </engine:Tab>
                 </engine:TabView>
                 <engine:Button text="Dispose" name="dispose-button" style="position: absolute;" />
             </engine:VisualElement>

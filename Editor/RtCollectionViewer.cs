@@ -4,7 +4,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using cfEngine.Rt;
-using cfEngine.Util;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -112,7 +111,7 @@ namespace cfUnityEngine.Editor
             _tabList.bindItem = (e, i) =>
             {
                 var button = (Button)e;
-                var collectionId = (Guid)collectionIds[i];
+                var collectionId = (Guid)_tabList.itemsSource[i];
                 if (_RtDebug.Instance.Collections.TryGetValue(collectionId, out var collectionRef))
                 {
                     if (collectionRef.TryGetTarget(out var collection))
@@ -153,12 +152,12 @@ namespace cfUnityEngine.Editor
             if (_RtDebug.Instance.CollectionSubs.TryGetValue(collection.__GetId(), out var subscriptionMap))
             {
                 var subscriptions = subscriptionMap.Values.ToList();
-                _subscriptionList.itemsSource = subscriptions.ToList();
+                _subscriptionList.itemsSource = subscriptions;
                 _subscriptionList.makeItem = () => new Label();
                 _subscriptionList.bindItem = (e, i) =>
                 {
                     var label = (Label)e;
-                    var subscriptionRef = subscriptions.ToList()[i];
+                    var subscriptionRef = (WeakReference<Subscription>)_subscriptionList.itemsSource[i];
                     if (subscriptionRef.TryGetTarget(out var subscription))
                     {
                         label.text = subscription.__GetDebugTitle();
