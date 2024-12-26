@@ -3,6 +3,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
 using cfEngine.Rt;
 using UnityEditor;
 using UnityEngine;
@@ -44,9 +45,7 @@ namespace cfUnityEngine.Editor
             {
                 if (!TryGetCollection(_currentCollectionId, out var currentCollection) || currentCollection.__GetSourceId() == Guid.Empty)
                 {
-                    _currentCollectionLabel.text = string.Empty;
-                    _currentCollectionId = Guid.Empty;
-                    DrawCollectionTabs(_RtDebug.Instance.GetRootCollectionIds());
+                    DrawRootCollections();
                 }
                 else
                 {
@@ -55,6 +54,17 @@ namespace cfUnityEngine.Editor
                 }
             };
             
+            DrawRootCollections();
+            
+            void DrawRootCollections()
+            {
+                _currentCollectionLabel.text = string.Empty;
+                _currentCollectionId = Guid.Empty;
+                _subscriptionList.itemsSource = null;
+                _contentList.itemsSource = null;
+                DrawCollectionTabs(_RtDebug.Instance.GetRootCollectionIds());
+            }
+
             var disposeButton = visualTreeRoot.Q<Button>("dispose-button");
             disposeButton.clicked += ()　=>
             {
@@ -74,9 +84,6 @@ namespace cfUnityEngine.Editor
                     GC.Collect();
                 }
             };
-
-            var rootCollectionIds = _RtDebug.Instance.GetRootCollectionIds();
-            DrawCollectionTabs(rootCollectionIds);
         }
 
         private void RedrawCurrentCollection()
@@ -178,6 +185,7 @@ namespace cfUnityEngine.Editor
             }
         }
         
+        private readonly JsonSerializerOptions _jsonOptions = new() {IgnoreReadOnlyFields = false, IgnoreReadOnlyProperties = false, IncludeFields = true};
         private void DrawContent(ICollectionDebug collection)
         {
             if (collection is not IEnumerable ienumerable)
@@ -197,7 +205,7 @@ namespace cfUnityEngine.Editor
             _contentList.bindItem = (e, i) =>
             {
                 var label = (Label)e;
-                label.text = _contentList.itemsSource[i].ToString();
+                label.text = JsonSerializer.Serialize(_contentList.itemsSource[i], _jsonOptions);
             };
         }
 
