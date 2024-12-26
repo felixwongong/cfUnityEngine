@@ -16,6 +16,7 @@ namespace cfUnityEngine.Editor
 
         private ListView _tabList;
         private ListView _subscriptionList;
+        private ListView _contentList;
         private Label _currentCollectionLabel;
 
         private Guid _currentCollectionId;
@@ -36,6 +37,7 @@ namespace cfUnityEngine.Editor
             _tabList = visualTreeRoot.Q<ListView>("tab-list");
             _currentCollectionLabel = visualTreeRoot.Q<Label>("current-collection-label");
             _subscriptionList = visualTreeRoot.Q<ListView>("subscription-list");
+            _contentList = visualTreeRoot.Q<ListView>("content-list");
             
             var backButton = visualTreeRoot.Q<Button>("back-button");
             backButton.clicked += () =>
@@ -93,6 +95,7 @@ namespace cfUnityEngine.Editor
                 }
                 
                 DrawSubscriptions(currentCollection);
+                DrawContent(currentCollection);
             }
         }
 
@@ -172,6 +175,29 @@ namespace cfUnityEngine.Editor
             {
                 _subscriptionList.itemsSource = null;
             }
+        }
+        
+        private void DrawContent(ICollectionDebug collection)
+        {
+            if (collection is not IEnumerable ienumerable)
+            {
+                _contentList.itemsSource = null;
+                return;
+            }
+
+            var contents = new List<object>();
+            foreach (var x in ienumerable)
+            {
+                contents.Add(x);
+            }
+
+            _contentList.itemsSource = contents;
+            _contentList.makeItem = () => new Label();
+            _contentList.bindItem = (e, i) =>
+            {
+                var label = (Label)e;
+                label.text = _contentList.itemsSource[i].ToString();
+            };
         }
 
         private bool TryGetCollection(Guid collectionId, out ICollectionDebug collection)
