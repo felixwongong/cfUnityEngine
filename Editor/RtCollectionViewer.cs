@@ -79,6 +79,7 @@ namespace cfUnityEngine.Editor
 
         private void RedrawCurrentCollection()
         {
+            GC.Collect();
             if (TryGetCollection(_currentCollectionId, out var currentCollection))
             {
                 _currentCollectionLabel.text = currentCollection.__GetDebugTitle();

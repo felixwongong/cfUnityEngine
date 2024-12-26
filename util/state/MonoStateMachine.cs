@@ -21,17 +21,26 @@ namespace cfUnityEngine.Util
 
         #region Relay & Events (OnBeforeStateChange[Once], OnAfterStateChange[Once]);
 
-        private Relay<StateChangeRecord<TStateId>> _beforeStateChangeRelay = new();
-        private Relay<StateChangeRecord<TStateId>> _afterStateChangeRelay = new();
+        private Relay<StateChangeRecord<TStateId>> _beforeStateChangeRelay;
+        private Relay<StateChangeRecord<TStateId>> _afterStateChangeRelay;
         
         public event Action<StateChangeRecord<TStateId>> OnBeforeStateChange
         {
-            add => _beforeStateChangeRelay.AddListener(value);
+            add
+            {
+                _beforeStateChangeRelay ??= new Relay<StateChangeRecord<TStateId>>(this);
+                _beforeStateChangeRelay.AddListener(value);
+            }
             remove => _beforeStateChangeRelay.RemoveListener(value);
         }
+
         public event Action<StateChangeRecord<TStateId>> OnAfterStateChange
         {
-            add => _afterStateChangeRelay.AddListener(value);
+            add
+            {
+                _afterStateChangeRelay ??= new Relay<StateChangeRecord<TStateId>>(this);
+                _afterStateChangeRelay.AddListener(value);
+            }
             remove => _afterStateChangeRelay.RemoveListener(value);
         }
 
@@ -133,7 +142,7 @@ namespace cfUnityEngine.Util
                 _currentState.enabled = true;
                 if (_lastState != null)
                 {
-                    _afterStateChangeRelay.Dispatch(new StateChangeRecord<TStateId>
+                    _afterStateChangeRelay?.Dispatch(new StateChangeRecord<TStateId>
                         { LastState = _lastState.Id, NewState = _currentState.Id });
                 }
                 _currentState.StartContext(param);
