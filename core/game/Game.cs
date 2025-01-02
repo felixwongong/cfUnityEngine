@@ -27,7 +27,7 @@ public partial class Game
     public static GameStateMachine Gsm { get; private set; }
     public static LoginHandler Auth { get; private set; }
     public static UserDataManager UserData { get; private set; }
-    public static MetaControllers Meta { get; private set; }
+    public static MetaLayer Meta { get; private set; }
 
     public static void MakeInstance(in InitParam param)
     {
@@ -38,7 +38,7 @@ public partial class Game
         Auth = param.auth;
         TaskToken = param.taskToken;
         UserData = param.userData;
-        Meta = new MetaControllers();
+        Meta = new MetaLayer();
     }
 
     public static void Dispose()

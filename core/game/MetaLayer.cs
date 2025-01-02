@@ -3,14 +3,14 @@ using cfEngine.Meta.Inventory;
 
 namespace cfEngine.Meta
 {
-    public class MetaControllers : IDisposable
+    public class MetaLayer : IDisposable
     {
 #if CF_STATISTIC
         public readonly StatisticController Statistic;
 #endif
         public readonly InventoryController Inventory;
 
-        public MetaControllers()
+        public MetaLayer()
         {
 #if CF_STATISTIC
             Statistic = new StatisticController();
