@@ -1,5 +1,4 @@
 using System;
-using System.Diagnostics;
 using System.Reflection;
 using UnityEditor;
 using UnityEngine;
@@ -7,19 +6,6 @@ using Debug = UnityEngine.Debug;
 
 namespace cfUnityEngine.Editor
 {
-    [Conditional("UNITY_EDITOR")]
-    [AttributeUsage(AttributeTargets.Method)]
-    public class MethodButtonAttribute : Attribute
-    {
-        public string buttonName { get; set; }
-
-        public MethodButtonAttribute(string btnName = "")
-        {
-            buttonName = btnName;
-        }
-    }
-
-
     [CustomEditor(typeof(MonoBehaviour), true)]
     public class MethodButtonEditor : UnityEditor.Editor
     {
@@ -35,14 +21,14 @@ namespace cfUnityEngine.Editor
                 _headerStyle = new GUIStyle(GUI.skin.label) { fontStyle = FontStyle.Bold };
             }
 
-            MonoBehaviour mono = target as MonoBehaviour;
+            Component mono = target as Component;
             if (mono == null)
             {
-                Debug.Log($"target {target} is not a MonoBehaviour!");
+                Debug.Log($"target {target} is not a Component!");
                 return;
             }
 
-            var flags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
+            var flags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy;
             MethodInfo[] methods = mono.GetType().GetMethods(flags);
 
             for (var i = 0; i < methods.Length; i++)
