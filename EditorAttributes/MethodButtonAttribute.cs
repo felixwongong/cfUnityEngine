@@ -8,10 +8,12 @@ namespace cfUnityEngine.Editor
     public class MethodButtonAttribute : Attribute
     {
         public string buttonName { get; set; }
+        public bool isPlayModeOnly { get; set; }
 
-        public MethodButtonAttribute(string btnName = "")
+        public MethodButtonAttribute(string btnName = "", bool playModeOnly = false)
         {
             buttonName = btnName;
+            isPlayModeOnly = playModeOnly;
         }
     }
 }

@@ -34,10 +34,10 @@ namespace cfUnityEngine.Editor
             for (var i = 0; i < methods.Length; i++)
             {
                 var method = methods[i];
-                var methodButton =
-                    Attribute.GetCustomAttribute(methods[i], typeof(MethodButtonAttribute)) as MethodButtonAttribute;
-
+                var methodButton = Attribute.GetCustomAttribute(methods[i], typeof(MethodButtonAttribute)) as MethodButtonAttribute;
                 if (methodButton == null) continue;
+                
+                if(methodButton.isPlayModeOnly && !Application.isPlaying) continue;
 
                 if (string.IsNullOrEmpty(methodButton.buttonName))
                 {
