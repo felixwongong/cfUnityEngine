@@ -2,7 +2,7 @@ using System.IO;
 using cfEngine.IO;
 using UnityEngine;
 
-public class StreamingAssetStorage : FileStorage
+public class StreamingAssetStorage : LocalFileStorage
 {
     public StreamingAssetStorage(string subDirectory) : base(Path.Combine(Application.dataPath, "StreamingAssets", subDirectory))
     {
@@ -10,7 +10,7 @@ public class StreamingAssetStorage : FileStorage
     }
 }
 
-public class EditorAssetStorage : FileStorage
+public class EditorAssetStorage : LocalFileStorage
 {
     public EditorAssetStorage(string subDirectory) : base(Path.Combine(Application.dataPath, subDirectory))
     {
