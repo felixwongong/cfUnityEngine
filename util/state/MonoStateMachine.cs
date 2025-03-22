@@ -84,7 +84,7 @@ namespace cfUnityEngine.Util
         private void Update()
         {
             _Update();
-            if (_currentState != null)
+            if (_currentState != null && _currentState.CanUpdate())
             {
                 _currentState._Update();
             }
