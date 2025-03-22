@@ -8,6 +8,7 @@ using cfEngine.Extension;
 using cfEngine.Logging;
 using UnityEngine;
 using UnityEngine.UIElements;
+using Object = UnityEngine.Object;
 
 namespace cfUnityEngine.UI
 {
@@ -81,7 +82,7 @@ namespace cfUnityEngine.UI
             TaskCompletionSource<TemplateContainer> loadTaskSource = new();
             _templateLoadMap[type] = loadTaskSource.Task;
 
-            Game.Get<AssetManager<UnityEngine.Object>>().LoadAsync<VisualTreeAsset>(config.path, Game.TaskToken)
+            Game.Current.GetAsset<Object>().LoadAsync<VisualTreeAsset>(config.path, Game.TaskToken)
                 .ContinueWith(t =>
                 {
                     if (t.IsFaulted && t.Exception != null)

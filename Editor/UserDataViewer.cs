@@ -29,7 +29,7 @@ namespace cfUnityEngine.Editor
 
                 saveButton.clicked += () =>
                 {
-                    Game.Get<UserDataManager>().SaveAsync().ContinueWith(t =>
+                    Game.Current.GetUserData().SaveAsync().ContinueWith(t =>
                     {
                         if (t.IsFaulted)
                         {

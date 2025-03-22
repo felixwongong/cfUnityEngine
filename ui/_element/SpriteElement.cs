@@ -49,7 +49,7 @@ namespace cfUnityEngine.UI
         {
             if (!string.IsNullOrEmpty(spritePath))
             {
-                Game.Get<AssetManager<Object>>().LoadAsync<Sprite>(spritePath)
+                Game.Current.GetAsset<Object>().LoadAsync<Sprite>(spritePath)
                     .ContinueWithSynchronized(t =>
                     {
                         if (!t.IsCompletedSuccessfully)
