@@ -1,3 +1,5 @@
+using cfEngine.Asset;
+using cfEngine.Core;
 using cfEngine.Extension;
 using cfEngine.Logging;
 using cfEngine.Rt;
@@ -47,7 +49,7 @@ namespace cfUnityEngine.UI
         {
             if (!string.IsNullOrEmpty(spritePath))
             {
-                Game.Asset.LoadAsync<Sprite>(spritePath)
+                Game.Get<AssetManager<Object>>().LoadAsync<Sprite>(spritePath)
                     .ContinueWithSynchronized(t =>
                     {
                         if (!t.IsCompletedSuccessfully)

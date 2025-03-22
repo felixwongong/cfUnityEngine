@@ -1,6 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
+using cfEngine.Asset;
+using cfEngine.Core;
 using cfEngine.Extension;
 using cfEngine.Logging;
 using UnityEngine;
@@ -78,7 +81,7 @@ namespace cfUnityEngine.UI
             TaskCompletionSource<TemplateContainer> loadTaskSource = new();
             _templateLoadMap[type] = loadTaskSource.Task;
 
-            Game.Asset.LoadAsync<VisualTreeAsset>(config.path, Game.TaskToken)
+            Game.Get<AssetManager<UnityEngine.Object>>().LoadAsync<VisualTreeAsset>(config.path, Game.TaskToken)
                 .ContinueWith(t =>
                 {
                     if (t.IsFaulted && t.Exception != null)

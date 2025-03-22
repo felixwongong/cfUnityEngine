@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using cfEngine.Service;
 
 public enum LoginPlatform : byte
 {
@@ -28,7 +29,19 @@ public abstract class PlatformAuth
     public abstract Task LinkAsync(LoginToken token);
 }
 
-public abstract class LoginHandler: IDisposable
+public interface IAuthService: IService
+{
+    string GetUserId();
+    bool IsSessionUserExist();
+    Task InitAsync(CancellationToken token);
+    Task<bool> TryLoginCachedUserAsync(CancellationToken token);
+    void RegisterPlatform(PlatformAuth platform);
+    Task SignInAsync(LoginPlatform platform, LoginToken token);
+    Task SignUpAsync(LoginPlatform platform, LoginToken token);
+    Task LinkAsync(LoginPlatform platform, LoginToken token);
+}
+
+public abstract class AuthService: IAuthService
 {
     private Dictionary<LoginPlatform, PlatformAuth> _platformAuths = new();
     public IReadOnlyDictionary<LoginPlatform, PlatformAuth> PlatformAuths => _platformAuths;
@@ -101,7 +114,7 @@ public class LocalPlatform : PlatformAuth
     }
 }
 
-public class LocalLoginHandler : LoginHandler
+public class LocalAuthService : AuthService
 {
     public override string GetUserId()
     {

@@ -1,9 +1,4 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using cfEngine.Rt;
-using cfEngine.Util;
+using cfEngine.Core;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -34,7 +29,7 @@ namespace cfUnityEngine.Editor
 
                 saveButton.clicked += () =>
                 {
-                    Game.UserData.SaveAsync().ContinueWith(t =>
+                    Game.Get<UserDataManager>().SaveAsync().ContinueWith(t =>
                     {
                         if (t.IsFaulted)
                         {
