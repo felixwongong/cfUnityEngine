@@ -11,13 +11,15 @@ namespace cfEngine.Core
     {
         public const string Auth = "Auth";
     }
-
+    
     public static partial class GameExtension
     {
-        public static IAuthService GetAuth(this Game game)
+        public static Game WithAuthService(this Game game, IAuthService service)
         {
-            return game.GetService<IAuthService>(ServiceName.Auth);
+            game.Register(service, ServiceName.Auth);
+            return game;
         }
+        public static IAuthService GetAuth(this Game game) => game.GetService<IAuthService>(ServiceName.Auth);
     }
 }
 

@@ -3,11 +3,12 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using cfEngine.Asset;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
 using Object = UnityEngine.Object;
 
-namespace cfEngine.Asset
+namespace cfUnityEngine.Asset
 {
     public class AddressableAssetManager: AssetManager<Object>
     {
