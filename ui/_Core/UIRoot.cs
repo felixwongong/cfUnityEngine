@@ -31,6 +31,8 @@ namespace cfUnityEngine.UI
         private Dictionary<Type, PanelConfig> _registeredPanelMap = new();
         private Dictionary<Type, Task<TemplateContainer>> _templateLoadMap = new();
         private Dictionary<Type, UIPanel> _panelMap = new();
+        
+        private Dictionary<Type, UIPanel.Builder> _panelBuilderMap = new();
 
 #if UNITY_EDITOR
         private void OnValidate()
@@ -51,16 +53,11 @@ namespace cfUnityEngine.UI
         public void Register<T>(string panelPath) where T : UIPanel
         {
             var type = typeof(T);
-            if (_registeredPanelMap.ContainsKey(type))
-            {
-                Log.LogException(new ArgumentException($"UI.Register: panel type already registered: {type}"));
-                return;
-            }
 
-            _registeredPanelMap.Add(type, new PanelConfig
+            if (!_panelBuilderMap.TryAdd(type, new UIPanel.Builder().SetPath(panelPath)))
             {
-                path = panelPath,
-            });
+                Log.LogException(new ArgumentException($"UIRoot.Register: panel type already registered, type: {type}, path: {panelPath}"));
+            }
         }
 
         public Task<TemplateContainer> LoadTemplate<T>() where T : UIPanel
@@ -68,7 +65,7 @@ namespace cfUnityEngine.UI
             var type = typeof(T);
             if (!_registeredPanelMap.TryGetValue(type, out var config))
             {
-                var ex = new KeyNotFoundException($"UI.LoadPanel: panel type not registered: {type}");
+                var ex = new KeyNotFoundException($"{nameof(LoadTemplate)}: panel type not registered: {type}");
                 Log.LogException(ex);
                 return Task.FromException<TemplateContainer>(ex);
             }

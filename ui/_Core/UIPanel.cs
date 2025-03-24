@@ -3,7 +3,7 @@ using UnityEngine.UIElements;
 
 namespace cfUnityEngine.UI
 {
-    public abstract class UIPanel : UIElement<TemplateContainer>
+    public abstract partial class UIPanel : UIElement<TemplateContainer>
     {
         [Preserve]
         protected UIPanel()
