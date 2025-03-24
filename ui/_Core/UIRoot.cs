@@ -28,10 +28,7 @@ namespace cfUnityEngine.UI
 
         [SerializeField] private UIDocument uiRootDocument;
 
-        private Dictionary<Type, PanelConfig> _registeredPanelMap = new();
-        private Dictionary<Type, Task<TemplateContainer>> _templateLoadMap = new();
         private Dictionary<Type, UIPanel> _panelMap = new();
-        
         private Dictionary<Type, UIPanel.Builder> _panelBuilderMap = new();
 
 #if UNITY_EDITOR
@@ -54,7 +51,7 @@ namespace cfUnityEngine.UI
         {
             var type = typeof(T);
 
-            if (!_panelBuilderMap.TryAdd(type, new UIPanel.Builder().SetPath(panelPath)))
+            if (!_panelBuilderMap.TryAdd(type, new UIPanel.Builder().SetAssetLoader(Game.Current.GetAsset<Object>()).SetPath(panelPath)))
             {
                 Log.LogException(new ArgumentException($"UIRoot.Register: panel type already registered, type: {type}, path: {panelPath}"));
             }
@@ -63,39 +60,14 @@ namespace cfUnityEngine.UI
         public Task<TemplateContainer> LoadTemplate<T>() where T : UIPanel
         {
             var type = typeof(T);
-            if (!_registeredPanelMap.TryGetValue(type, out var config))
+            if (!_panelBuilderMap.TryGetValue(type, out var builder))
             {
                 var ex = new KeyNotFoundException($"{nameof(LoadTemplate)}: panel type not registered: {type}");
                 Log.LogException(ex);
                 return Task.FromException<TemplateContainer>(ex);
             }
 
-            if (_templateLoadMap.TryGetValue(type, out var templateLoadTask) &&
-                templateLoadTask.IsCompletedSuccessfully)
-            {
-                return templateLoadTask;
-            }
-
-            TaskCompletionSource<TemplateContainer> loadTaskSource = new();
-            _templateLoadMap[type] = loadTaskSource.Task;
-
-            Game.Current.GetAsset<Object>().LoadAsync<VisualTreeAsset>(config.path, Game.TaskToken)
-                .ContinueWith(t =>
-                {
-                    if (t.IsFaulted && t.Exception != null)
-                    {
-                        loadTaskSource.SetException(t.Exception);
-                        return;
-                    }
-
-                    var template = t.Result.Instantiate();
-#if UNITY_EDITOR
-                    template.name = string.Format(EditorName, type);
-#endif
-                    loadTaskSource.SetResult(template);
-                }, Game.TaskToken, TaskContinuationOptions.None, TaskScheduler.FromCurrentSynchronizationContext());
-
-            return loadTaskSource.Task;
+            return builder.LoadTemplate().SetName(string.Format(EditorName, typeof(T))).loadTask;
         }
 
         public async Task<T> LoadPanel<T>() where T : UIPanel
@@ -125,27 +97,22 @@ namespace cfUnityEngine.UI
         public static T GetPanel<T>() where T : UIPanel
         {
             var type = typeof(T);
-            if (!Instance._registeredPanelMap.ContainsKey(type))
+            if (!Instance._panelBuilderMap.ContainsKey(type))
             {
                 Log.LogException(
-                    new KeyNotFoundException(
-                        $"UI.GetPanel: panel type not registered: {type}, call {nameof(Register)} first"));
+                    new KeyNotFoundException( $"UI.GetPanel: panel type not registered: {type}, call {nameof(Register)} first"));
                 return null;
             }
 
             if (!Instance._panelMap.TryGetValue(type, out var panel))
             {
-                Log.LogException(
-                    new KeyNotFoundException(
-                        $"UI.GetPanel: panel type not loaded: {type}, call {nameof(LoadPanel)} first"));
+                Log.LogException(new KeyNotFoundException( $"UI.GetPanel: panel type not loaded: {type}, call {nameof(LoadPanel)} first"));
                 return null;
             }
 
             if (panel is not T t)
             {
-                Log.LogException(
-                    new InvalidCastException(
-                        $"UI.GetPanel: panel type mismatch: load: {panel.GetType()}, Request: {type}"));
+                Log.LogException(new InvalidCastException($"UI.GetPanel: panel type mismatch: load: {panel.GetType()}, Request: {type}"));
                 return null;
             }
 
@@ -154,14 +121,10 @@ namespace cfUnityEngine.UI
 
         public void Dispose()
         {
-            _registeredPanelMap.Clear();
-
-            foreach (var task in _templateLoadMap.Values)
+            foreach (var builder in _panelBuilderMap.Values)
             {
-                task.DisposeIfCompleted();
+                builder.Dispose();
             }
-
-            _templateLoadMap.Clear();
 
             foreach (var panel in _panelMap.Values)
             {
