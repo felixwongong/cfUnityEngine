@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace cfUnityEngine
 {
-    public abstract class UGUIResolver : MonoBehaviour, IPropertyResolver
+    public abstract class PropertyResolver : MonoBehaviour, IPropertyResolver
     {
         [SerializeField] private string propertyName;
         

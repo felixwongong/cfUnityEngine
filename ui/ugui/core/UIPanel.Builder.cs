@@ -13,7 +13,7 @@ namespace cfUnityEngine.UI.UGUI
             IBuilder SetPath(string path);
             public IBuilder SetAssetLoader(AssetManager<Object> assetLoader);
             public Task Preload();
-            Task Instantiate();
+            Task<GameObject> Instantiate();
         }
         
         public class Builder<T>: IBuilder
@@ -53,7 +53,7 @@ namespace cfUnityEngine.UI.UGUI
                 return _preloadTask;
             }
             
-            public Task Instantiate()
+            public Task<GameObject> Instantiate()
             {
                 if (_preloadTask == null)
                 {
@@ -61,7 +61,7 @@ namespace cfUnityEngine.UI.UGUI
                     Preload();
                 }
                 
-                TaskCompletionSource<bool> promise = new();
+                TaskCompletionSource<GameObject> promise = new();
                _preloadTask.ContinueWithSynchronized(task =>
                     {
                         if (task.IsFaulted && task.Exception != null)
@@ -74,7 +74,8 @@ namespace cfUnityEngine.UI.UGUI
                         }
                         else
                         {
-                            promise.SetResult(task.Result);
+                            var prefab = task.Result;
+                            promise.SetResult(Object.Instantiate(prefab));
                         }
                     });
                 

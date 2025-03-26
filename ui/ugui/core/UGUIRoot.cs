@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using cfEngine.Asset;
+using cfEngine.Extension;
 using UnityEngine;
 using cfEngine.Logging;
 using Object = UnityEngine.Object;
@@ -48,7 +49,20 @@ namespace cfUnityEngine.UI.UGUI
                 return Task.CompletedTask;
             }
             
-            return builder.Instantiate();
+            var task = builder.Instantiate();
+            return task.ContinueWithSynchronized(t => 
+            {
+                if (t.IsFaulted)
+                {
+                    Log.LogException(t.Exception);
+                }
+                else
+                {
+                    var instanceTransform = t.Result.transform;
+                    instanceTransform.SetParent(transform);
+                    instanceTransform.localPosition = Vector3.zero;
+                }
+            });
         }
 
         public void Dispose()
