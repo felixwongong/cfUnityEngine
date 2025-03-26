@@ -7,12 +7,12 @@ namespace cfUnityEngine.UI.UGUI
         public abstract string id { get; }
         public void Show()
         {
-            Log.LogInfo("UIPanel.Show: {0}", id);
+            Log.LogInfo($"UIPanel.Show: {id}");
         }
         
         public void Hide()
         {
-            Log.LogInfo("UIPanel.Hide: {0}", id);
+            Log.LogInfo($"UIPanel.Hide: {id}");
         }
     }
 }

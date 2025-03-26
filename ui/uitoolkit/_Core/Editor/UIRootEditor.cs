@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace cfUnityEngine.UI.UIToolkit.Editor
 {
-    [CustomEditor(typeof(UIRoot))]
+    [CustomEditor(typeof(UIToolkitRoot))]
     public class UIRootEditor : UnityEditor.Editor
     {
         public override void OnInspectorGUI()

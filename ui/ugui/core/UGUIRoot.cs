@@ -50,5 +50,10 @@ namespace cfUnityEngine.UI.UGUI
             
             return builder.Instantiate();
         }
+
+        public void Dispose()
+        {
+            _assetLoader?.Dispose();
+        }
     }
 }

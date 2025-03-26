@@ -13,13 +13,13 @@ using Object = UnityEngine.Object;
 namespace cfUnityEngine.UI.UIToolkit
 {
     [RequireComponent(typeof(UIDocument))]
-    public class UIRoot : MonoBehaviour, IDisposable
+    public class UIToolkitRoot : MonoBehaviour, IDisposable
     {
 #if UNITY_EDITOR
         private const string EditorName = "{0} (EditorName)";
 #endif
 
-        public static UIRoot Instance { get; private set; }
+        public static UIToolkitRoot Instance { get; private set; }
 
         public class PanelConfig
         {

@@ -45,7 +45,7 @@ namespace cfUnityEngine.UI.UGUI
             {
                 if (_assetLoader == null)
                 {
-                    Log.LogWarning("UIPanel.Builder.Preload: asset loader is null, call SetAssetLoader first, path: {0}", _path);
+                    Log.LogWarning($"UIPanel.Builder.Preload: asset loader is null, call SetAssetLoader first, path: {_path}");
                     return Task.CompletedTask;
                 }
                 
@@ -57,7 +57,7 @@ namespace cfUnityEngine.UI.UGUI
             {
                 if (_preloadTask == null)
                 {
-                    Log.LogWarning("UIPanel.Builder.Instantiate: preload task is null, call Preload first, path: {0}", _path);
+                    Log.LogWarning($"UIPanel.Builder.Instantiate: preload task is null, call Preload first, path: {_path}");
                     Preload();
                 }
                 
