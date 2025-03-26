@@ -10,7 +10,7 @@ using UnityEngine;
 using UnityEngine.UIElements;
 using Object = UnityEngine.Object;
 
-namespace cfUnityEngine.UI
+namespace cfUnityEngine.UI.UIToolkit
 {
     [RequireComponent(typeof(UIDocument))]
     public class UIRoot : MonoBehaviour, IDisposable

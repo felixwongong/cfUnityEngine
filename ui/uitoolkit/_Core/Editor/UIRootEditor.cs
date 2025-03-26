@@ -4,7 +4,7 @@ using cfUnityEngine.Editor;
 using UnityEditor;
 using UnityEngine;
 
-namespace cfUnityEngine.UI.Editor
+namespace cfUnityEngine.UI.UIToolkit.Editor
 {
     [CustomEditor(typeof(UIRoot))]
     public class UIRootEditor : UnityEditor.Editor

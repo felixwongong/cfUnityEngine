@@ -6,7 +6,7 @@ using cfEngine.Extension;
 using UnityEngine.UIElements;
 using Object = UnityEngine.Object;
 
-namespace cfUnityEngine.UI
+namespace cfUnityEngine.UI.UIToolkit
 {
     public partial class UIPanel
     {

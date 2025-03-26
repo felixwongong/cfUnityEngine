@@ -5,7 +5,7 @@ using cfEngine.Logging;
 using cfEngine.Rt;
 using UnityEngine.UIElements;
 
-namespace cfUnityEngine.UI
+namespace cfUnityEngine.UI.UIToolkit
 {
     //TODO: need optimized for string template & string builder
     public class LabelElement : UIElement<Label>

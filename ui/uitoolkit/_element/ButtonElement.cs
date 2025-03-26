@@ -2,7 +2,7 @@ using System;
 using cfEngine.Rt;
 using UnityEngine.UIElements;
 
-namespace cfUnityEngine.UI
+namespace cfUnityEngine.UI.UIToolkit
 {
     public class ButtonElement: UIElement<Button>
     {

@@ -7,7 +7,7 @@ using cfEngine.Util;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-namespace cfUnityEngine.UI
+namespace cfUnityEngine.UI.UIToolkit
 {
     public class SpriteElement : UIElement<VisualElement>
     {

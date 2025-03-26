@@ -1,7 +1,7 @@
 using UnityEngine.Scripting;
 using UnityEngine.UIElements;
 
-namespace cfUnityEngine.UI
+namespace cfUnityEngine.UI.UIToolkit
 {
     public abstract partial class UIPanel : UIElement<TemplateContainer>
     {
