@@ -2,7 +2,12 @@ using UnityEngine;
 
 namespace cfUnityEngine
 {
-    public class PropertyBinder : MonoBehaviour
+    public interface IPropertyBinder
+    {
+        void BindSource(IPropertySource source);
+    }
+    
+    public class PropertyBinder : MonoBehaviour, IPropertyBinder
     {
         private IPropertySource source;
         
