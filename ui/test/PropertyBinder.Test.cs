@@ -25,10 +25,10 @@ namespace cfUnityEngine.test
         private class TestPropertyResolver : MonoBehaviour, IPropertyIntResolver 
         {
             public int resolvedValue = -1;
-            public void Resolve(string propertyName, int value)
+            public void Resolve(string resolveProperty, int value)
             {
-                Debug.Log($"PropertyResolver: {propertyName} = {value}");
-                if (propertyName == "testValue")
+                Debug.Log($"PropertyResolver: {resolveProperty} = {value}");
+                if (resolveProperty == "testValue")
                 {
                     resolvedValue = value;
                 }
@@ -42,7 +42,7 @@ namespace cfUnityEngine.test
 
             var source = new TestPropertySource();
             var resolver = go.AddComponent<TestPropertyResolver>();
-            var binder = go.AddComponent<PropertyBinder>();
+            var binder = go.AddComponent<PropertyObjectBinder>();
             binder.BindSource(source);
             
             Assert.AreEqual(-1, resolver.resolvedValue);

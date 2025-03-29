@@ -4,5 +4,6 @@
     {
         public string id { get; }
         public void Show();
+        public void Bind(INamespaceScope scope);
     }
 }

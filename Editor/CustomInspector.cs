@@ -23,6 +23,21 @@ namespace cfUnityEngine.Editor
                 fieldValue ??= default(bool);
                 return EditorGUILayout.Toggle(fieldName, (bool)fieldValue);
             }
+            else if(type == typeof(int))
+            {
+                fieldValue ??= default(int);
+                return EditorGUILayout.IntField(fieldName, (int)fieldValue);
+            }
+            else if(type == typeof(float))
+            {
+                fieldValue ??= default(float);
+                return EditorGUILayout.FloatField(fieldName, (float)fieldValue);
+            }
+            else if(type == typeof(string))
+            {
+                fieldValue ??= default(string);
+                return EditorGUILayout.TextField(fieldName, (string)fieldValue);
+            }
             else
             {
                 EditorGUILayout.LabelField($"Field {type} not supported");

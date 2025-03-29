@@ -1,18 +1,51 @@
-﻿using cfEngine.Logging;
-
-namespace cfUnityEngine.UI.UGUI
+﻿namespace cfUnityEngine.UI.UGUI
 {
-    public abstract partial class UIPanel: IUIPanel
+    public abstract partial class UIPanel: PropertySource, IUIPanel
     {
         public abstract string id { get; }
-        public void Show()
-        {
-            Log.LogInfo($"UIPanel.Show: {id}");
-        }
+
+        private bool enabled = false;
         
-        public void Hide()
+        public virtual void Show()
         {
-            Log.LogInfo($"UIPanel.Hide: {id}");
+            enabled = true;
+            OnPropertyChanged(nameof(enabled), enabled);
+        }
+
+        public virtual void Hide()
+        {
+            enabled = false;
+            OnPropertyChanged(nameof(enabled), enabled);
+        }
+
+        public virtual void Bind(INamespaceScope scope)
+        {
+            BindSubspace(scope, "this", this);
+        }
+
+        protected INamespaceScope BindSubspace(INamespaceScope scope, string subNsName, IPropertySource source)
+        {
+            if (scope.@namespace.Equals(subNsName))
+            {
+                BindScopeBinders(scope);
+                return scope;
+            }
+
+            var subscope = scope.GetSubspace(subNsName);
+            BindScopeBinders(subscope);
+
+            return subscope;
+
+            void BindScopeBinders(INamespaceScope scope)
+            {
+                if (scope.TryGetScopeComponents<IPropertyBinder>(out var binders))
+                {
+                    foreach (var binder in binders.Span)
+                    {
+                        binder.BindSource(source);
+                    }
+                }
+            }
         }
     }
 }

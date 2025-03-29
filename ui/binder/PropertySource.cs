@@ -8,6 +8,7 @@ namespace cfUnityEngine
         public event Action<string, object> onPropertyChanged;
         public event Action<string, int> onPropertyIntChanged;
         public event Action<string, float> onPropertyFloatChanged;
+        public event Action<string, bool> onPropertyBoolChanged;
     }
 
     public class PropertySource: IPropertySource
@@ -15,16 +16,16 @@ namespace cfUnityEngine
         public event Action<string, object> onPropertyChanged;
         public event Action<string, int> onPropertyIntChanged;
         public event Action<string, float> onPropertyFloatChanged;
+        public event Action<string, bool> onPropertyBoolChanged;
 
         protected void OnPropertyChanged<T>(string propertyName, T value)
         {
             if (value is int intValue)
-            {
                 onPropertyIntChanged?.Invoke(propertyName, intValue);
-            } else if (value is float floatValue)
-            {
+            else if (value is float floatValue)
                 onPropertyFloatChanged?.Invoke(propertyName, floatValue);
-            }
+            else if (value is bool boolValue)
+                onPropertyBoolChanged?.Invoke(propertyName, boolValue);
             else 
             {
                 if (value.GetType().IsValueType)

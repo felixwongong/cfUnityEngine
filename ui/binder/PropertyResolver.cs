@@ -6,9 +6,9 @@ namespace cfUnityEngine
     {
         [SerializeField] private string propertyName;
         
-        public void Resolve(string propertyName, object value)
+        public void Resolve(string resolveProperty, object value)
         {
-            if (propertyName.Equals(this.propertyName))
+            if (resolveProperty.Equals(this.propertyName))
             {
                 OnResolve(value);
             }

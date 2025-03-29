@@ -1,8 +1,10 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using cfEngine.Asset;
 using cfEngine.Extension;
 using cfEngine.Logging;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace cfUnityEngine.UI.UGUI
 {
@@ -15,8 +17,8 @@ namespace cfUnityEngine.UI.UGUI
             public Task Preload();
             Task<GameObject> Instantiate();
         }
-        
-        public class Builder<T>: IBuilder
+
+        public class Builder<T> : IBuilder where T: IUIPanel
         {
             private string _path;
             private T _dataSource;
@@ -75,7 +77,23 @@ namespace cfUnityEngine.UI.UGUI
                         else
                         {
                             var prefab = task.Result;
-                            promise.SetResult(Object.Instantiate(prefab));
+                            var instance = Object.Instantiate(prefab);
+                            if (!instance.TryGetComponent<INamespaceScope>(out var scope))
+                            {
+                                promise.SetException(new InvalidOperationException("UIPanel.Builder.Instantiate: property binder not found on instantiated panel, cannot bind"));
+                            }
+                            else
+                            {
+                                try
+                                {
+                                    _dataSource.Bind(scope);
+                                    promise.SetResult(instance);
+                                }
+                                catch (Exception e)
+                                {
+                                    promise.SetException(e);
+                                }
+                            }
                         }
                     });
                 
