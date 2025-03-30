@@ -5,7 +5,8 @@
         "cfEngine",
         "Unity.Addressables",
         "Unity.ResourceManager",
-        "Unity.2D.Animation.Runtime"
+        "Unity.2D.Animation.Runtime",
+        "Unity.TextMeshPro"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
