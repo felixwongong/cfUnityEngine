@@ -2,12 +2,8 @@ using UnityEngine;
 
 namespace cfUnityEngine
 {
-    public class UGUITextResolver : PropertyResolver, IPropertyResolver
+    public class UGUITextResolver : PropertyObjectResolver
     {
-        private void Awake()
-        {
-        }
-
         protected override void OnResolve(object value)
         {
         }

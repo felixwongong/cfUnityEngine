@@ -1,13 +1,14 @@
 using System;
+using System.Collections;
 using UnityEditor;
 
 namespace cfUnityEngine.Editor
 {
     public class CustomInspector : UnityEditor.Editor
     {
-        public static object DrawField(Type type, string fieldName, object fieldValue)
+        public static object DrawField(string fieldName, object fieldValue)
         {
-            //TODO: Use dictionary to improve performance
+            var type = fieldValue?.GetType();
             if (type == typeof(UnityEngine.Vector2))
             {
                 fieldValue ??= default(UnityEngine.Vector2);
@@ -37,6 +38,17 @@ namespace cfUnityEngine.Editor
             {
                 fieldValue ??= default(string);
                 return EditorGUILayout.TextField(fieldName, (string)fieldValue);
+            }
+            else if (typeof(IDictionary).IsAssignableFrom(type))
+            {
+                var dictionary = (IDictionary)fieldValue;
+                if (dictionary != null)
+                {
+                    foreach (DictionaryEntry entry in dictionary)
+                    {
+                        DrawField(entry.Key.ToString(), entry.Value);
+                    }
+                }
             }
             else
             {

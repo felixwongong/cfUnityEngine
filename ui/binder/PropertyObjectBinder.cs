@@ -1,12 +1,7 @@
 namespace cfUnityEngine
 {
-    public class PropertyObjectBinder : PropertyBinderBase<IPropertyResolver, object>
+    public class PropertyObjectBinder : PropertyBinderBase<PropertyObjectResolver, object>
     {
-        private void OnSourcePropertyChanged(string propertyName, object value)
-        {
-            Resolve(resolvers, propertyName, value);
-        }
-        
         protected override void AddObservers(IPropertySource source)
         {
             source.onPropertyChanged += OnSourcePropertyChanged;

@@ -9,21 +9,14 @@ namespace cfUnityEngine
         void BindSource(IPropertySource source);
     }
 
-    public abstract class PropertyBinderBase<T, TValueType> : MonoBehaviour, IPropertyBinder
+    public abstract class PropertyBinderBase<T, TValueType> : MonoBehaviour, IPropertyBinder where T: MonoBehaviour, IPropertyResolver<TValueType>
     {
 #if UNITY_EDITOR
-        [UnityEngine.Scripting.Preserve] private TValueType __cachedValue;
+        [UnityEngine.Scripting.Preserve] private Dictionary<string, TValueType> _cachedValueMap = new();
 #endif
-        
-        protected List<T> resolvers { get; private set; }
+        [SerializeField] protected List<T> resolvers;
         private IPropertySource source { get; set; }
 
-        protected virtual void Awake()
-        {
-            var res = GetComponents<T>();
-            if(res.Length > 0) resolvers = new List<T>(res);
-        }
-        
         public void BindSource(IPropertySource newSource)
         {
             if (source != null)
@@ -42,12 +35,17 @@ namespace cfUnityEngine
                 RemoveObservers(source);
             }
         }
+        
+        protected void OnSourcePropertyChanged(string propertyName, TValueType value)
+        {
+            Resolve(resolvers, propertyName, value);
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         protected void Resolve<TResolver, TValue>(IReadOnlyList<TResolver> resolvers, string propertyName, TValue value) where TResolver: IPropertyResolver<TValue> where TValue: TValueType
         {
 #if UNITY_EDITOR
-            __cachedValue = value;
+            _cachedValueMap[propertyName] = value;
 #endif
             
             for (var i = 0; i < resolvers.Count; i++)

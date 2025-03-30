@@ -2,20 +2,10 @@ using UnityEngine;
 
 namespace cfUnityEngine.UI.UGUI
 {
-    public class ActiveInactiveResolver: MonoBehaviour, IPropertyBoolResolver
+    public class ActiveInactiveResolver: PropertyBoolResolver
     {
-        [SerializeField] private string propertyName = "enabled";
-            
-        public void Resolve(string resolveProperty, bool value)
-        {
-            if (resolveProperty.Equals(propertyName))
-            {
-                SetActive(value);
-            }
-        }
-        
         [Editor.MethodButton]
-        public virtual void SetActive(bool value)
+        protected override void OnResolve(bool value)
         {
             gameObject.SetActive(value);
         }

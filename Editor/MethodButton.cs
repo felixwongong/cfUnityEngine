@@ -55,7 +55,11 @@ namespace cfUnityEngine.Editor
                     var parameter = parameters[j];
                     EditorGUILayout.BeginHorizontal();
                     Type type = parameter.ParameterType;
-                    parameterValues[j] = CustomInspector.DrawField(type, parameter.Name, parameterValues[j]);
+                    if (type.IsValueType)
+                    {
+                        parameterValues[j] = Activator.CreateInstance(type);
+                    }
+                    parameterValues[j] = CustomInspector.DrawField(parameter.Name, parameterValues[j]);
                     EditorGUILayout.EndHorizontal();
                 }
 

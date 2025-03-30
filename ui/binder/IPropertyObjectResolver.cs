@@ -5,7 +5,7 @@ namespace cfUnityEngine
         void Resolve(string resolveProperty, T value);
     }
     
-    public interface IPropertyResolver: IPropertyResolver<object> { }
+    public interface IPropertyObjectResolver: IPropertyResolver<object> { }
     public interface IPropertyIntResolver: IPropertyResolver<int> { }
     public interface IPropertyFloatResolver: IPropertyResolver<float> { }
     public interface IPropertyBoolResolver : IPropertyResolver<bool> { }

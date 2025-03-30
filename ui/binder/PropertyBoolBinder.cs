@@ -1,12 +1,7 @@
 namespace cfUnityEngine
 {
-    public class PropertyBoolBinder: PropertyBinderBase<IPropertyBoolResolver, bool>
+    public class PropertyBoolBinder: PropertyBinderBase<PropertyBoolResolver, bool>
     {
-        private void OnSourcePropertyChanged(string propertyName, bool value)
-        {
-            Resolve(resolvers, propertyName, value);
-        }
-        
         protected override void AddObservers(IPropertySource source)
         {
             source.onPropertyBoolChanged += OnSourcePropertyChanged;
