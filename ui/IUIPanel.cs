@@ -4,6 +4,7 @@
     {
         public string id { get; }
         public void Show();
+        public void Hide();
         public void Bind(INamespaceScope scope);
     }
 }

@@ -32,7 +32,10 @@
             }
 
             var subscope = scope.GetSubspace(subNsName);
-            BindScopeBinders(subscope);
+            if (subscope != null)
+            {
+                BindScopeBinders(subscope);
+            }
 
             return subscope;
 

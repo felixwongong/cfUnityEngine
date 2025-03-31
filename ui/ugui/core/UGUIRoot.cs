@@ -65,6 +65,28 @@ namespace cfUnityEngine.UI.UGUI
             });
         }
 
+        public IUIPanel GetPanel(string panelId)
+        {
+            if (!_panelBuilders.TryGetValue(panelId, out var builder))
+            {
+                Log.LogException(new ArgumentException($"UIRoot.GetPanel: panel not registered, panelId: {panelId}"));
+                return default;
+            }
+
+            return (IUIPanel)builder.GetDataSource();
+        }
+
+        public T GetPanel<T>(string panelId) where T : IUIPanel
+        {
+            if (!_panelBuilders.TryGetValue(panelId, out var builder))
+            {
+                Log.LogException(new ArgumentException($"UIRoot.GetPanel: panel not registered, panelId: {panelId}"));
+                return default;
+            }
+
+            return (T)builder.GetDataSource();
+        }
+
         public void Dispose()
         {
             _assetLoader?.Dispose();

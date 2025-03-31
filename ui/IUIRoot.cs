@@ -13,6 +13,8 @@ namespace cfUnityEngine.UI
         public Task PreloadPanel(string panelId);
 
         public Task InstantiatePanel(string panelId);
+        public IUIPanel GetPanel(string panelId);
+        public T GetPanel<T>(string panelId) where T : IUIPanel;
     }
 
     public static class UIRoot

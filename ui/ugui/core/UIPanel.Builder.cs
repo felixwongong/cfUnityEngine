@@ -16,6 +16,7 @@ namespace cfUnityEngine.UI.UGUI
             public IBuilder SetAssetLoader(AssetManager<Object> assetLoader);
             public Task Preload();
             Task<GameObject> Instantiate();
+            object GetDataSource();
         }
 
         public class Builder<T> : IBuilder where T: IUIPanel
@@ -98,6 +99,11 @@ namespace cfUnityEngine.UI.UGUI
                     });
                 
                 return promise.Task;
+            }
+
+            public object GetDataSource()
+            {
+                return _dataSource;
             }
         }
     }
