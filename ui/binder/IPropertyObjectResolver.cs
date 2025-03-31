@@ -2,6 +2,7 @@ namespace cfUnityEngine
 {
     public interface IPropertyResolver<in T>
     {
+        bool canResolve { get; set; }
         void Resolve(string resolveProperty, T value);
     }
     

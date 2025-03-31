@@ -15,9 +15,23 @@ namespace cfUnityEngine
         }
         protected abstract void OnResolve(TValueType value);
     }
-    
-    public abstract class PropertyObjectResolver : PropertyResolverBase<object>, IPropertyObjectResolver { }
-    public abstract class PropertyBoolResolver: PropertyResolverBase<bool>, IPropertyBoolResolver { }
-    public abstract class PropertyIntResolver: PropertyResolverBase<int>, IPropertyIntResolver { }
-    public abstract class PropertyFloatResolver : PropertyResolverBase<float>, IPropertyFloatResolver { }
+
+    public abstract class PropertyObjectResolver : PropertyResolverBase<object>, IPropertyObjectResolver
+    {
+        public bool canResolve { get => enabled; set => enabled = value; }
+    }
+    public abstract class PropertyBoolResolver: PropertyResolverBase<bool>, IPropertyBoolResolver
+    {
+        public bool canResolve { get => enabled; set => enabled = value; }
+    }
+
+    public abstract class PropertyIntResolver : PropertyResolverBase<int>, IPropertyIntResolver
+    {
+        public bool canResolve { get => enabled; set => enabled = value; }
+    }
+
+    public abstract class PropertyFloatResolver : PropertyResolverBase<float>, IPropertyFloatResolver
+    {
+        public bool canResolve { get => enabled; set => enabled = value; }
+    }
 }

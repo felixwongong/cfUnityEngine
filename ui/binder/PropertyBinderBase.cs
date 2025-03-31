@@ -50,7 +50,11 @@ namespace cfUnityEngine
             
             for (var i = 0; i < resolvers.Count; i++)
             {
-                resolvers[i].Resolve(propertyName, value);
+                var resolver = resolvers[i];
+                if (resolver is { canResolve: true })
+                {
+                    resolver.Resolve(propertyName, value);
+                }
             }
         }
 

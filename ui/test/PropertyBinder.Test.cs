@@ -25,6 +25,8 @@ namespace cfUnityEngine.test
         private class TestPropertyResolver : MonoBehaviour, IPropertyIntResolver 
         {
             public int resolvedValue = -1;
+            public bool canResolve {get => enabled; set => enabled = value;}
+
             public void Resolve(string resolveProperty, int value)
             {
                 Debug.Log($"PropertyResolver: {resolveProperty} = {value}");
