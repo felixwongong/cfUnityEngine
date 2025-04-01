@@ -1,5 +1,6 @@
 using System;
 using System.Reflection;
+using cfEngine.Util;
 using UnityEditor;
 using UnityEngine;
 using Debug = UnityEngine.Debug;
@@ -55,13 +56,10 @@ namespace cfUnityEngine.Editor
                     var parameter = parameters[j];
                     EditorGUILayout.BeginHorizontal();
                     Type type = parameter.ParameterType;
-                    if (type.IsValueType)
+                    var defaultValue = type.GetDefaultValue();
+                    if (parameterValues[j] == null)
                     {
-                        parameterValues[j] = Activator.CreateInstance(type);
-                    }
-                    else if(type == typeof(string))
-                    {
-                        parameterValues[j] = string.Empty;
+                        parameterValues[j] = defaultValue;
                     }
                     parameterValues[j] = CustomInspector.DrawField(parameter.Name, parameterValues[j]);
                     EditorGUILayout.EndHorizontal();
