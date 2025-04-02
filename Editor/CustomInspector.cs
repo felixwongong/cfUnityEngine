@@ -52,7 +52,7 @@ namespace cfUnityEngine.Editor
             }
             else
             {
-                EditorGUILayout.LabelField($"Field {type} not supported");
+                EditorGUILayout.LabelField(fieldName, fieldValue?.GetType().Name);
             }
 
             return null;

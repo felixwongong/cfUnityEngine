@@ -20,21 +20,18 @@
 
         public virtual void Bind(INamespaceScope scope)
         {
-            BindSubspace(scope, "this", this);
+            BindSubscope(scope, "this", this);
         }
 
-        protected INamespaceScope BindSubspace(INamespaceScope scope, string subscopeName, IPropertySource source)
+        protected INamespaceScope BindSubscope(INamespaceScope scope, string childName, IPropertySource source)
         {
-            if (scope.@namespace.Equals(subscopeName))
+            if (scope.@namespace.Equals(childName))
             {
-                scope.SetBinderSource(source);
+                scope.SetSource(source);
                 return scope;
             }
 
-            var subscope = scope.GetSubspace(subscopeName);
-            subscope?.SetBinderSource(source);
-
-            return subscope;
+            return scope.SetChildSource(childName, source);
         }
     }
 }
