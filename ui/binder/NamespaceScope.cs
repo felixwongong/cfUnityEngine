@@ -60,5 +60,16 @@ namespace cfUnityEngine
             components = GetComponents<T>();
             return components.Length > 0;
         }
+
+        public void SetBinderSource(IPropertySource source)
+        {
+            if (TryGetScopeComponents<IPropertyBinder>(out var binders))
+            {
+                foreach (var binder in binders.Span)
+                {
+                    binder.BindSource(source);
+                }
+            }
+        }
     }
 }

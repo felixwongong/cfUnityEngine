@@ -10,5 +10,6 @@ namespace cfUnityEngine
         public INamespaceScope GetSubspace(string nsName);
         public ReadOnlyMemory<T> GetScopeComponents<T>();
         public bool TryGetScopeComponents<T>(out ReadOnlyMemory<T> components);
+        public void SetBinderSource(IPropertySource source);
     }
 }

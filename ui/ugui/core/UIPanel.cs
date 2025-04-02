@@ -23,32 +23,18 @@
             BindSubspace(scope, "this", this);
         }
 
-        protected INamespaceScope BindSubspace(INamespaceScope scope, string subNsName, IPropertySource source)
+        protected INamespaceScope BindSubspace(INamespaceScope scope, string subscopeName, IPropertySource source)
         {
-            if (scope.@namespace.Equals(subNsName))
+            if (scope.@namespace.Equals(subscopeName))
             {
-                BindScopeBinders(scope);
+                scope.SetBinderSource(source);
                 return scope;
             }
 
-            var subscope = scope.GetSubspace(subNsName);
-            if (subscope != null)
-            {
-                BindScopeBinders(subscope);
-            }
+            var subscope = scope.GetSubspace(subscopeName);
+            subscope?.SetBinderSource(source);
 
             return subscope;
-
-            void BindScopeBinders(INamespaceScope scope)
-            {
-                if (scope.TryGetScopeComponents<IPropertyBinder>(out var binders))
-                {
-                    foreach (var binder in binders.Span)
-                    {
-                        binder.BindSource(source);
-                    }
-                }
-            }
         }
     }
 }
