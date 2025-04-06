@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class StreamingAssetStorage : LocalFileStorage
 {
-    public StreamingAssetStorage(string subDirectory) : base(Path.Combine(Application.dataPath, "StreamingAssets", subDirectory))
+    public StreamingAssetStorage(string subDirectory) : base(Path.Combine(Application.streamingAssetsPath, subDirectory))
     {
         
     }
