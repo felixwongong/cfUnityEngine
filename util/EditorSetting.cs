@@ -36,6 +36,10 @@ namespace cfUnityEngine.Util
             {
                 AssetDatabase.CreateAsset(CreateInstance<T>(), $"{filePath.folderPath}/{filePath.fileName}.asset");
                 guids = AssetDatabase.FindAssets($"{filePath.fileName} t:ScriptableObject", searchFolder);
+                if (guids.Length == 0)
+                {
+                    return null;
+                }
             }
         
             if (guids.Length > 1)

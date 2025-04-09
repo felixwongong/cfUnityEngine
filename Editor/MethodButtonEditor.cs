@@ -4,10 +4,11 @@ using cfEngine.Util;
 using UnityEditor;
 using UnityEngine;
 using Debug = UnityEngine.Debug;
+using Object = UnityEngine.Object;
 
 namespace cfUnityEngine.Editor
 {
-    [CustomEditor(typeof(MonoBehaviour), true)]
+    [CustomEditor(typeof(Object), true)]
     public class MethodButtonEditor : UnityEditor.Editor
     {
         private GUIStyle _headerStyle;
@@ -22,15 +23,14 @@ namespace cfUnityEngine.Editor
                 _headerStyle = new GUIStyle(GUI.skin.label) { fontStyle = FontStyle.Bold };
             }
 
-            Component mono = target as Component;
-            if (mono == null)
+            if (target == null)
             {
                 Debug.Log($"target {target} is not a Component!");
                 return;
             }
 
             var flags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy;
-            MethodInfo[] methods = mono.GetType().GetMethods(flags);
+            MethodInfo[] methods = target.GetType().GetMethods(flags);
 
             for (var i = 0; i < methods.Length; i++)
             {
@@ -67,7 +67,7 @@ namespace cfUnityEngine.Editor
 
                 if (GUILayout.Button("Invoke " + methodButton.buttonName))
                 {
-                    method.Invoke(mono, parameterValues);
+                    method.Invoke(target, parameterValues);
                 }
             }
         }

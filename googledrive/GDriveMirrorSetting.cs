@@ -1,6 +1,9 @@
 #if CF_GOOGLE_DRIVE
 
 using System;
+using System.Collections.Generic;
+using cfEngine.Extension;
+using cfUnityEngine.Editor;
 using cfUnityEngine.Util;
 using UnityEngine;
 
@@ -10,8 +13,45 @@ namespace cfUnityEngine.GoogleDrive
     public class GDriveMirrorSetting : EditorSetting<GDriveMirrorSetting>
     {
         public TextAsset serviceAccountCredentialJson;
-        public float refreshIntervalSecond = 5f;
         public MirrorItem[] items;
+
+        private Dictionary<string, MirrorItem> _mirrorMap = new();
+        public Dictionary<string, MirrorItem> mirrorMap => _mirrorMap;
+
+        [MethodButton]
+        private void Refresh()
+        {
+            GDriveMirror.instance.RefreshAsync()
+                .ContinueWithSynchronized(result =>
+                {
+                    if (result.IsFaulted)
+                    {
+                        Debug.LogError(result.Exception);
+                    }
+                    else
+                    {
+                        Debug.Log("Refresh completed");
+                    }
+                });
+        }
+
+        private void OnValidate()
+        {
+            if(_mirrorMap.Count != items.Length)
+            {
+                _mirrorMap.Clear();
+                
+                foreach (var item in items)
+                {
+                    if (string.IsNullOrEmpty(item.googleDriveId)) continue;
+                    
+                    if(!_mirrorMap.TryAdd(item.googleDriveId, item))
+                    {
+                        Debug.LogError($"Duplicate googleDriveId {item.googleDriveId}");
+                    }
+                }
+            }
+        }
     }
 
     [Serializable]

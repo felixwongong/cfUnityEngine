@@ -1,65 +1,42 @@
 #if CF_GOOGLE_DRIVE
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using cfEngine.Extension;
 using Google.Apis.Auth.OAuth2;
 using Google.Apis.Drive.v3;
+using Google.Apis.Drive.v3.Data;
 using Google.Apis.Services;
 using UnityEditor;
 using UnityEngine;
 
 namespace cfUnityEngine.GoogleDrive
 {
+    public interface IFileMirrorHandler
+    {
+        void RefreshFiles(FilesResource filesResource, IEnumerable<File> files);
+    }
+    
     [InitializeOnLoad]
     public class GDriveMirror
     {
-        private static GDriveMirror _instance;
-        
+        public static GDriveMirror instance { get; }
+
         static GDriveMirror()
         {
-            Debug.Log("static Init");
-            _instance = new GDriveMirror();
+            instance = new GDriveMirror(new AssetDirectFileMirror());
         }
 
         public DateTime lastRefreshTime { get; private set; } = DateTime.MinValue;
         private CancellationTokenSource _refreshCancelToken;
+        private readonly IFileMirrorHandler _mirrorHandler;
 
-        private GDriveMirror()
+        public GDriveMirror(IFileMirrorHandler mirrorHandler)
         {
-            EditorApplication.update += OnEditorUpdate;
+            _mirrorHandler = mirrorHandler;
         }
 
-        ~GDriveMirror()
-        {
-            EditorApplication.update -= OnEditorUpdate;
-        }
-
-        private void OnEditorUpdate()
-        {
-            var refreshInterval = GDriveMirrorSetting.GetSetting().refreshIntervalSecond;
-            if ((DateTime.Now - lastRefreshTime).TotalSeconds < refreshInterval)
-            {
-                return;
-            }
-
-            if (_refreshCancelToken != null)
-            {
-                _refreshCancelToken.Cancel();
-            }
-            
-            RefreshAsync().ContinueWithSynchronized(result =>
-            {
-                if (result.IsFaulted)
-                {
-                    Debug.LogException(result.Exception);
-                }
-            });
-            
-            lastRefreshTime = DateTime.Now;
-        }
-
-        private async Task RefreshAsync()
+        public async Task RefreshAsync()
         {
             _refreshCancelToken = new CancellationTokenSource();
             
@@ -69,7 +46,7 @@ namespace cfUnityEngine.GoogleDrive
             
             Debug.Log(credentialJson?.text);
             var credential = GoogleCredential.FromJson(credentialJson.text)
-                .CreateScoped(new[] { DriveService.ScopeConstants.DriveReadonly });
+                .CreateScoped(new[] { DriveService.ScopeConstants.Drive, DriveService.ScopeConstants.DriveMetadata });
 
             var service = new DriveService(new BaseClientService.Initializer()
             {
@@ -77,13 +54,13 @@ namespace cfUnityEngine.GoogleDrive
             });
 
             var request = service.Files.List();
+            // request.Fields = "files(id, name, mimeType, createdTime, modifiedTime, size, owners)";
             var response = await request.ExecuteAsync(_refreshCancelToken.Token);
-            foreach (var file in response.Files)
-            {
-                Debug.Log($"{file.Name} ({file.Id}), {file.Kind}, {file.ModifiedTimeDateTimeOffset}");
-            }
+            _mirrorHandler.RefreshFiles(service.Files, response.Files);
 
             _refreshCancelToken = null;
+            
+            lastRefreshTime = DateTime.Now;
         }
     }
 }
