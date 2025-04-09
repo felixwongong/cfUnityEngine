@@ -1,16 +1,10 @@
 using System;
-using System.Diagnostics;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
 
 namespace cfUnityEngine.Editor
 {
-    [Conditional("UNITY_EDITOR"), AttributeUsage(AttributeTargets.Field)]
-    public class AssetPathAttribute : PropertyAttribute
-    {
-    }
-
     [CustomPropertyDrawer(typeof(AssetPathAttribute))]
     public class AssetPathAttributeDrawer : PropertyDrawer
     {
