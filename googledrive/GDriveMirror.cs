@@ -14,7 +14,7 @@ namespace cfUnityEngine.GoogleDrive
 {
     public interface IFileMirrorHandler
     {
-        void RefreshFiles(FilesResource filesResource, IEnumerable<File> files);
+        Task RefreshFiles(FilesResource filesResource, IEnumerable<File> googleFiles);
     }
     
     [InitializeOnLoad]
@@ -44,7 +44,6 @@ namespace cfUnityEngine.GoogleDrive
             var credentialJson = setting.serviceAccountCredentialJson;
             if (credentialJson == null) return;
             
-            Debug.Log(credentialJson?.text);
             var credential = GoogleCredential.FromJson(credentialJson.text)
                 .CreateScoped(new[] { DriveService.ScopeConstants.Drive, DriveService.ScopeConstants.DriveMetadata });
 
@@ -54,9 +53,11 @@ namespace cfUnityEngine.GoogleDrive
             });
 
             var request = service.Files.List();
-            // request.Fields = "files(id, name, mimeType, createdTime, modifiedTime, size, owners)";
+            request.Fields = "files(id, name, mimeType, createdTime, modifiedTime, size, owners)";
             var response = await request.ExecuteAsync(_refreshCancelToken.Token);
-            _mirrorHandler.RefreshFiles(service.Files, response.Files);
+            await _mirrorHandler.RefreshFiles(service.Files, response.Files);
+            
+            Debug.Log("[GDriveMirror.RefreshAsync] refresh files succeed");
 
             _refreshCancelToken = null;
             

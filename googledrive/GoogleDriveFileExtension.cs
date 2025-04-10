@@ -48,5 +48,35 @@ namespace cfUnityEngine.GoogleDrive
                     return null;
             }
         }
+
+        public static string getExportExtensionType(this File file)
+        {
+            switch (file.MimeType)
+            {
+                case "application/vnd.google-apps.document":
+                    return "docx";
+
+                case "application/vnd.google-apps.spreadsheet":
+                    return "xlsx";
+
+                case "application/vnd.google-apps.presentation":
+                    return "pptx";
+
+                case "application/vnd.google-apps.drawing":
+                    return "png";
+
+                // These Google types can't be exported
+                case "application/vnd.google-apps.folder":
+                case "application/vnd.google-apps.form":
+                case "application/vnd.google-apps.site":
+                case "application/vnd.google-apps.shortcut":
+                case "application/vnd.google-apps.jam":
+                case "application/vnd.google-apps.map":
+                    return null;
+
+                default:
+                    return null;
+            }
+        }
     }
 }

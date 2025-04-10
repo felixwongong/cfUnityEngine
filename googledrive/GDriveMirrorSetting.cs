@@ -58,7 +58,7 @@ namespace cfUnityEngine.GoogleDrive
     public class MirrorItem
     {
         public string googleDriveId;
-        public string mirrorAssetLocation;
+        public string assetFolderPath;
     }
 }
 
