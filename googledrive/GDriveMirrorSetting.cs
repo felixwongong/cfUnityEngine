@@ -6,6 +6,7 @@ using cfEngine.Extension;
 using cfUnityEngine.Editor;
 using cfUnityEngine.Util;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace cfUnityEngine.GoogleDrive
 {
@@ -57,8 +58,10 @@ namespace cfUnityEngine.GoogleDrive
     [Serializable]
     public class MirrorItem
     {
-        public string googleDriveId;
         public string assetFolderPath;
+        public string googleDriveId;
+        [ReadOnly]
+        public string optionalLocalAssetName;
     }
 }
 

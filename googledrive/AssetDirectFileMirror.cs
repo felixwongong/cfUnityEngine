@@ -1,17 +1,17 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
 using Google.Apis.Drive.v3;
 using UnityEngine;
-using File = Google.Apis.Drive.v3.Data.File;
+using GoogleFile = Google.Apis.Drive.v3.Data.File;
+using SystemFile = System.IO.File;
 
 namespace cfUnityEngine.GoogleDrive
 {
     public class AssetDirectFileMirror: IFileMirrorHandler
     {
-        public Task RefreshFiles(FilesResource filesResource, IEnumerable<File> googleFiles)
+        public Task RefreshFiles(FilesResource filesResource, IEnumerable<GoogleFile> googleFiles)
         {
             var setting = GDriveMirrorSetting.GetSetting();
             if (setting == null) return Task.FromException(new InvalidOperationException("[AssetDirectFileMirror.RefreshFiles] GDriveMirrorSetting is null"));
@@ -31,8 +31,15 @@ namespace cfUnityEngine.GoogleDrive
                     if (!Directory.Exists(absolutePath))
                         Directory.CreateDirectory(absolutePath);
                     
-                    var fileName = googleFile.Name;
-                    var fileStream = new FileStream(Path.Combine(absolutePath, $"{fileName}.{googleFile.getExportExtensionType()}"), FileMode.OpenOrCreate, FileAccess.Write) ;
+                    var googleFileName = googleFile.Name;
+                    var googleFileWithExtension = $"{googleFileName}.{googleFile.getExportExtensionType()}";
+                    var localAssetName = mirror.optionalLocalAssetName;
+                    if (string.IsNullOrWhiteSpace(localAssetName))
+                    {
+                        localAssetName = googleFileWithExtension;
+                    }
+                    
+                    var fileStream = new FileStream(Path.Combine(absolutePath, localAssetName), FileMode.OpenOrCreate, FileAccess.Write) ;
                     
                     if (googleFile.isGoogleMimeType())
                     {
@@ -41,6 +48,10 @@ namespace cfUnityEngine.GoogleDrive
                         var downloadTask = request.DownloadAsync(fileStream).ContinueWith(task =>
                         {
                             fileStream.Dispose();
+                            if (task.IsCompletedSuccessfully)
+                            {
+                                mirror.optionalLocalAssetName = localAssetName;
+                            }
                         });
                         downloadTasks.Add(downloadTask);
                     }

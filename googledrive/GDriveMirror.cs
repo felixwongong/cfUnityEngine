@@ -16,7 +16,8 @@ namespace cfUnityEngine.GoogleDrive
     {
         Task RefreshFiles(FilesResource filesResource, IEnumerable<File> googleFiles);
     }
-    
+
+
     [InitializeOnLoad]
     public class GDriveMirror
     {
@@ -45,7 +46,7 @@ namespace cfUnityEngine.GoogleDrive
             if (credentialJson == null) return;
             
             var credential = GoogleCredential.FromJson(credentialJson.text)
-                .CreateScoped(new[] { DriveService.ScopeConstants.Drive, DriveService.ScopeConstants.DriveMetadata });
+                .CreateScoped(DriveService.ScopeConstants.Drive, DriveService.ScopeConstants.DriveMetadata);
 
             var service = new DriveService(new BaseClientService.Initializer()
             {
