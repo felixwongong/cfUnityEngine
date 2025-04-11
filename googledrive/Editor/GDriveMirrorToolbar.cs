@@ -6,6 +6,7 @@ using UnityEditor.EditorTools;
 using UnityEditor.Overlays;
 using UnityEditor.Toolbars;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 namespace cfUnityEngine.GoogleDrive
 {
@@ -22,27 +23,26 @@ namespace cfUnityEngine.GoogleDrive
         {
             get
             {
-// This is retrieving the built-in Visual Elements for pivot mode and pivot rotation to add them to your tool settings toolbar
-                yield return "Tool Settings/Pivot Mode";
-                yield return "Tool Settings/Pivot Rotation";
-                
-//This is adding your custom element
                 yield return "GDriveMirror/Refresh";
             }
         }
     }
+    
     [EditorToolbarElement("GDriveMirror/Refresh")]
     public class GDriveMirrorToolbar : EditorToolbarButton
     {
         public GDriveMirrorToolbar()
         {
-            text = "Refresh";
+            iconImage = Background.FromTexture2D((Texture2D)EditorGUIUtility.IconContent("Refresh").image);
             tooltip = "Refresh GDrive files";
             clicked += () =>
             {
+                text = null;
+                SetEnabled(false);
                 GDriveMirror.instance.RefreshAsync()
                     .ContinueWithSynchronized(result =>
                     {
+                        SetEnabled(true);
                         if (result.IsFaulted)
                         {
                             Debug.LogError(result.Exception);
@@ -51,6 +51,8 @@ namespace cfUnityEngine.GoogleDrive
                         {
                             Debug.Log("Refresh completed");
                         }
+                        
+                        SetEnabled(true);
                     });
             };
         }

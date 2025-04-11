@@ -1,3 +1,5 @@
+#if CF_GOOGLE_DRIVE && UNITY_EDITOR
+
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -62,3 +64,5 @@ namespace cfUnityEngine.GoogleDrive
         }
     }
 }
+
+#endif

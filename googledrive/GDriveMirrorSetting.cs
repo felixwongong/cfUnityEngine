@@ -6,7 +6,6 @@ using cfEngine.Extension;
 using cfUnityEngine.Editor;
 using cfUnityEngine.Util;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 namespace cfUnityEngine.GoogleDrive
 {

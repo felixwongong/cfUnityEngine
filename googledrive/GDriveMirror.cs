@@ -28,7 +28,6 @@ namespace cfUnityEngine.GoogleDrive
             instance = new GDriveMirror(new AssetDirectFileMirror());
         }
 
-        public DateTime lastRefreshTime { get; private set; } = DateTime.MinValue;
         private CancellationTokenSource _refreshCancelToken;
         private readonly IFileMirrorHandler _mirrorHandler;
 
@@ -39,12 +38,17 @@ namespace cfUnityEngine.GoogleDrive
 
         public async Task RefreshAsync()
         {
+            Debug.Log("[GDriveMirror.RefreshAsync] start refresh files");
             _refreshCancelToken = new CancellationTokenSource();
             
             var setting = GDriveMirrorSetting.GetSetting();
             var credentialJson = setting.serviceAccountCredentialJson;
-            if (credentialJson == null) return;
-            
+            if (credentialJson == null)
+            {
+                Debug.Log("[GDriveMirror.RefreshAsync] setting.serviceAccountCredentialJson is null, refresh failed");
+                return;
+            }
+
             var credential = GoogleCredential.FromJson(credentialJson.text)
                 .CreateScoped(DriveService.ScopeConstants.Drive, DriveService.ScopeConstants.DriveMetadata);
 
@@ -61,8 +65,6 @@ namespace cfUnityEngine.GoogleDrive
             Debug.Log("[GDriveMirror.RefreshAsync] refresh files succeed");
 
             _refreshCancelToken = null;
-            
-            lastRefreshTime = DateTime.Now;
         }
     }
 }
