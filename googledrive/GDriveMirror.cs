@@ -48,13 +48,13 @@ namespace cfUnityEngine.GoogleDrive
         {
             var setting = GDriveMirrorSetting.GetSetting();
             var credentialJson = setting.serviceAccountCredentialJson;
-            if (credentialJson == null)
+            if (string.IsNullOrEmpty(credentialJson))
             {
                 _logger.LogInfo("[GDriveMirror.CreateFileRequest] setting.serviceAccountCredentialJson is null, refresh failed");
                 return null;
             }
 
-            var credential = GoogleCredential.FromJson(credentialJson.text)
+            var credential = GoogleCredential.FromJson(credentialJson)
                 .CreateScoped(DriveService.ScopeConstants.Drive, DriveService.ScopeConstants.DriveMetadata);
 
             return new DriveService(new BaseClientService.Initializer()
