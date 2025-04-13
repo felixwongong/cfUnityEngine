@@ -1,3 +1,5 @@
+#if CF_GOOGLE_DRIVE
+
 using Google.Apis.Drive.v3.Data;
 
 namespace cfUnityEngine.GoogleDrive
@@ -80,3 +82,5 @@ namespace cfUnityEngine.GoogleDrive
         }
     }
 }
+
+#endif

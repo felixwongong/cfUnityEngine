@@ -2,15 +2,13 @@
 
 using System;
 using System.Collections.Generic;
-using cfEngine.Extension;
 using cfUnityEngine.Editor;
 using cfUnityEngine.Util;
-using UnityEditor;
 using UnityEngine;
 
 namespace cfUnityEngine.GoogleDrive
 {
-    [Util.FilePath("Assets/GoogleDrive", "MirrorSetting")]
+    [FilePath("Assets/GoogleDrive", "MirrorSetting")]
     public class GDriveMirrorSetting : EditorSetting<GDriveMirrorSetting>
     {
         public TextAsset serviceAccountCredentialJson;
