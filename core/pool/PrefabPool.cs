@@ -1,13 +1,9 @@
-using System;
-using System.Collections;
 using cfEngine.Pooling;
-using JetBrains.Annotations;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
 public class PrefabPool<T> : ObjectPool<T> where T: Component
 {
-    [CanBeNull] 
     private readonly Transform _poolRoot;
 
     public PrefabPool(T prefab, bool createPoolRoot)
@@ -15,7 +11,7 @@ public class PrefabPool<T> : ObjectPool<T> where T: Component
     {
     }
     
-    public PrefabPool(T prefab, [CanBeNull] Transform poolRoot) 
+    public PrefabPool(T prefab, Transform poolRoot) 
         : base(() => CreateInstance(prefab), disposed => ReleaseInstance(disposed, poolRoot))
     {
         _poolRoot = poolRoot;
