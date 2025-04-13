@@ -2,7 +2,7 @@
 
 using System;
 using System.Collections.Generic;
-using cfEngine.Extension;
+using System.IO;
 using cfUnityEngine.Editor;
 using cfUnityEngine.Util;
 using UnityEditor;
@@ -13,7 +13,30 @@ namespace cfUnityEngine.GoogleDrive
     [Util.FilePath("Assets/GoogleDrive", "MirrorSetting")]
     public class GDriveMirrorSetting : EditorSetting<GDriveMirrorSetting>
     {
-        public TextAsset serviceAccountCredentialJson;
+        [AssetPath]
+        [SerializeField] private string _serviceAccountCredentialJsonPath;
+
+        private string _serviceAccountCredentialJson = string.Empty;
+        public string serviceAccountCredentialJson
+        {
+            get
+            {
+                if (!string.IsNullOrEmpty(_serviceAccountCredentialJson))
+                {
+                    return _serviceAccountCredentialJson;
+                }
+
+                var assetPath = _serviceAccountCredentialJsonPath;
+                var asset = AssetDatabase.LoadAssetAtPath<TextAsset>($"Assets/{assetPath}");
+                if (asset == null)
+                {
+                    Debug.LogError($"[GDriveMirrorSetting.serviceAccountCredentialJson] Asset is not a TextAsset: {assetPath}");
+                }
+                _serviceAccountCredentialJson = asset.text;
+                return _serviceAccountCredentialJson;
+            }
+        }
+
         public MirrorItem[] items;
 
         private Dictionary<string, MirrorItem> _mirrorMap = new();

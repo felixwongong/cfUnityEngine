@@ -24,14 +24,15 @@ namespace cfUnityEngine.GoogleDrive
             get
             {
                 yield return "GDriveMirror/Refresh";
+                yield return "GDriveMirror/Show Setting";
             }
         }
     }
     
     [EditorToolbarElement("GDriveMirror/Refresh")]
-    public class GDriveMirrorToolbar : EditorToolbarButton
+    public class GDriveMirrorToolbarButton_Refresh : EditorToolbarButton
     {
-        public GDriveMirrorToolbar()
+        public GDriveMirrorToolbarButton_Refresh()
         {
             iconImage = Background.FromTexture2D((Texture2D)EditorGUIUtility.IconContent("Refresh").image);
             tooltip = "Refresh GDrive files";
@@ -54,6 +55,20 @@ namespace cfUnityEngine.GoogleDrive
                         
                         SetEnabled(true);
                     });
+            };
+        }
+    }
+    
+    [EditorToolbarElement("GDriveMirror/Show Setting")]
+    public class GDriveMirrorToolbarButton_ShowSetting : EditorToolbarButton
+    {
+        public GDriveMirrorToolbarButton_ShowSetting()
+        {
+            iconImage = Background.FromTexture2D((Texture2D)EditorGUIUtility.IconContent("SettingsIcon").image);
+            tooltip = "Show Mirror Setting";
+            clicked += () =>
+            {
+                Selection.activeObject = GDriveMirrorSetting.GetSetting();
             };
         }
     }

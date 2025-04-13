@@ -1,14 +1,15 @@
-using System;
+using System.IO;
 using UnityEditor;
 using UnityEngine;
-using UnityEngine.UIElements;
 
 namespace cfUnityEngine.Editor
 {
     [CustomPropertyDrawer(typeof(AssetPathAttribute))]
     public class AssetPathAttributeDrawer : PropertyDrawer
     {
-        public override VisualElement CreatePropertyGUI(SerializedProperty property)
+        private static readonly string ApplicationDataPathForReplace = $"{Application.dataPath}{Path.DirectorySeparatorChar}";
+        
+        /*public override VisualElement CreatePropertyGUI(SerializedProperty property)
         {
             var rootContainer = new VisualElement();
             var propertyContainer = new VisualElement();
@@ -74,6 +75,43 @@ namespace cfUnityEngine.Editor
             }
 
             return rootContainer;
+        }*/
+        public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
+        {
+            // Reserve rects
+            float labelWidth = EditorGUIUtility.labelWidth;
+            float buttonWidth = 22f;
+
+            Rect labelRect = new Rect(position.x, position.y, labelWidth, position.height);
+            Rect fieldRect = new Rect(position.x + labelWidth, position.y,position.width - labelWidth - buttonWidth * 2, position.height);
+            Rect folderButtonRect = new Rect(fieldRect.xMax, position.y, buttonWidth, position.height);
+            Rect searchButtonRect = new Rect(folderButtonRect.xMax, position.y, buttonWidth, position.height);
+
+            // Label
+            EditorGUI.LabelField(labelRect, label);
+
+            EditorGUI.BeginProperty(position, label, property);
+
+            // TextField
+            string newPath = EditorGUI.TextField(fieldRect, GUIContent.none, property.stringValue);
+            
+            EditorGUI.EndProperty();
+            
+            // Folder button
+            if (!string.IsNullOrEmpty(property.stringValue) && AssetDatabase.IsValidFolder(property.stringValue))
+            {
+                if (GUI.Button(folderButtonRect, EditorGUIUtility.IconContent("Prefab Icon"), GUIStyle.none))
+                {
+                    EditorDirectoryUtil.FocusDirectory(property.stringValue); // Your custom util
+                }
+            }
+
+            // Search button
+            if (GUI.Button(searchButtonRect, EditorGUIUtility.IconContent("_Popup"), GUIStyle.none))
+            {
+                var path = EditorUtility.OpenFilePanel("Select File", "Assets", "");
+                property.stringValue = path.Replace(ApplicationDataPathForReplace, string.Empty).Replace("\\", "/");
+            }
         }
     }
 }
