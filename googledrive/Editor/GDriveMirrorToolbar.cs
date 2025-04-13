@@ -39,7 +39,7 @@ namespace cfUnityEngine.GoogleDrive
             {
                 text = null;
                 SetEnabled(false);
-                GDriveMirror.instance.RefreshAsync()
+                GDriveMirror.instance.RefreshWithProgressBar()
                     .ContinueWithSynchronized(result =>
                     {
                         SetEnabled(true);

@@ -17,23 +17,24 @@ namespace cfUnityEngine.GoogleDrive
         public MirrorItem[] items;
 
         private Dictionary<string, MirrorItem> _mirrorMap = new();
+        public bool refreshOnEnterPlayMode = false;
         public Dictionary<string, MirrorItem> mirrorMap => _mirrorMap;
         
         [MethodButton]
         private void Refresh()
         {
-            GDriveMirror.instance.RefreshAsync()
-                .ContinueWithSynchronized(result =>
+            Debug.Log("[GDriveMirrorSetting.Refresh] refresh started");
+            GDriveMirror.instance.RefreshWithProgressBar().ContinueWith(task =>
+            {
+                if (task.IsFaulted)
                 {
-                    if (result.IsFaulted)
-                    {
-                        Debug.LogError(result.Exception);
-                    }
-                    else
-                    {
-                        Debug.Log("Refresh completed");
-                    }
-                });
+                    Debug.LogError($"[GDriveMirrorSetting.Refresh] refresh failed: {task.Exception}");
+                }
+                else
+                {
+                    Debug.Log("[GDriveMirrorSetting.Refresh] refresh succeed");
+                }
+            });
         }
 
         private void OnValidate()
