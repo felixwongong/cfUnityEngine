@@ -13,54 +13,66 @@ namespace cfUnityEngine.GoogleDrive
 {
     public class AssetDirectFileMirror: IFileMirrorHandler
     {
-        public Task RefreshFiles(FilesResource filesResource, IEnumerable<GoogleFile> googleFiles)
+        public Task RefreshFilesAsync(FilesResource filesResource, IEnumerable<GoogleFile> googleFiles)
         {
             var setting = GDriveMirrorSetting.GetSetting();
-            if (setting == null) return Task.FromException(new InvalidOperationException("[AssetDirectFileMirror.RefreshFiles] GDriveMirrorSetting is null"));
+            if (setting == null) return Task.FromException(new InvalidOperationException("[AssetDirectFileMirror.RefreshFilesAsync] GDriveMirrorSetting is null"));
             
             var mirrorMap = setting.mirrorMap;
 
             List<Task> downloadTasks = new List<Task>();
             foreach (var googleFile in googleFiles)
             {
-                var id = googleFile.Id;
+                if (!mirrorMap.TryGetValue(googleFile.Id, out var mirror))
+                    continue;
+                
+                var assetFolderPath = mirror.assetFolderPath;
+                var absolutePath = Path.Combine(Application.dataPath, assetFolderPath);
 
-                if (mirrorMap.TryGetValue(id, out var mirror))
+                if (!Directory.Exists(absolutePath))
+                    Directory.CreateDirectory(absolutePath);
+                
+                var googleFileName = googleFile.Name;
+                var googleFileWithExtension = $"{googleFileName}.{googleFile.getExportExtensionType()}";
+                var localAssetName = mirror.optionalLocalAssetName;
+                if (string.IsNullOrWhiteSpace(localAssetName))
                 {
-                    var assetFolderPath = mirror.assetFolderPath;
-                    var absolutePath = Path.Combine(Application.dataPath, assetFolderPath);
-
-                    if (!Directory.Exists(absolutePath))
-                        Directory.CreateDirectory(absolutePath);
-                    
-                    var googleFileName = googleFile.Name;
-                    var googleFileWithExtension = $"{googleFileName}.{googleFile.getExportExtensionType()}";
-                    var localAssetName = mirror.optionalLocalAssetName;
-                    if (string.IsNullOrWhiteSpace(localAssetName))
+                    localAssetName = googleFileWithExtension;
+                }
+                
+                var fileStream = new FileStream(Path.Combine(absolutePath, localAssetName), FileMode.OpenOrCreate, FileAccess.Write) ;
+                
+                if (googleFile.isGoogleMimeType())
+                {
+                    var mimeType = googleFile.getExportMimeType();
+                    var request = filesResource.Export(googleFile.Id, mimeType);
+                    var downloadTask = request.DownloadAsync(fileStream).ContinueWith(task =>
                     {
-                        localAssetName = googleFileWithExtension;
-                    }
-                    
-                    var fileStream = new FileStream(Path.Combine(absolutePath, localAssetName), FileMode.OpenOrCreate, FileAccess.Write) ;
-                    
-                    if (googleFile.isGoogleMimeType())
-                    {
-                        var mimeType = googleFile.getExportMimeType();
-                        var request = filesResource.Export(googleFile.Id, mimeType);
-                        var downloadTask = request.DownloadAsync(fileStream).ContinueWith(task =>
+                        fileStream.Dispose();
+                        if (task.IsCompletedSuccessfully)
                         {
-                            fileStream.Dispose();
-                            if (task.IsCompletedSuccessfully)
-                            {
-                                mirror.optionalLocalAssetName = localAssetName;
-                            }
-                        });
-                        downloadTasks.Add(downloadTask);
-                    }
+                            mirror.optionalLocalAssetName = localAssetName;
+                        }
+                    });
+                    downloadTasks.Add(downloadTask);
                 }
             }
 
             return Task.WhenAll(downloadTasks);
+        }
+
+        public void RefreshFiles(FilesResource filesResource, IEnumerable<GoogleFile> googleFiles)
+        {
+            var setting = GDriveMirrorSetting.GetSetting();
+            if (setting == null)
+            {
+                Debug.LogException(new InvalidOperationException("[AssetDirectFileMirror.RefreshFiles] GDriveMirrorSetting is null"));
+                return;
+            }
+            
+            var mirrorMap = setting.mirrorMap;
+            
+            
         }
     }
 }

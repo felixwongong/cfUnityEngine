@@ -5,11 +5,12 @@ using System.Collections.Generic;
 using cfEngine.Extension;
 using cfUnityEngine.Editor;
 using cfUnityEngine.Util;
+using UnityEditor;
 using UnityEngine;
 
 namespace cfUnityEngine.GoogleDrive
 {
-    [FilePath("Assets/GoogleDrive", "MirrorSetting")]
+    [Util.FilePath("Assets/GoogleDrive", "MirrorSetting")]
     public class GDriveMirrorSetting : EditorSetting<GDriveMirrorSetting>
     {
         public TextAsset serviceAccountCredentialJson;
@@ -17,7 +18,7 @@ namespace cfUnityEngine.GoogleDrive
 
         private Dictionary<string, MirrorItem> _mirrorMap = new();
         public Dictionary<string, MirrorItem> mirrorMap => _mirrorMap;
-
+        
         [MethodButton]
         private void Refresh()
         {
