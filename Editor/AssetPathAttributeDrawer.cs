@@ -7,7 +7,7 @@ namespace cfUnityEngine.Editor
     [CustomPropertyDrawer(typeof(AssetPathAttribute))]
     public class AssetPathAttributeDrawer : PropertyDrawer
     {
-        private static readonly string ApplicationDataPathForReplace = $"{Application.dataPath}{Path.DirectorySeparatorChar}";
+        private static readonly string ApplicationDataPathForReplace = $"{Application.dataPath}/";
         
         /*public override VisualElement CreatePropertyGUI(SerializedProperty property)
         {
@@ -87,15 +87,14 @@ namespace cfUnityEngine.Editor
             Rect folderButtonRect = new Rect(fieldRect.xMax, position.y, buttonWidth, position.height);
             Rect searchButtonRect = new Rect(folderButtonRect.xMax, position.y, buttonWidth, position.height);
 
-            // Label
-            EditorGUI.LabelField(labelRect, label);
-
             EditorGUI.BeginProperty(position, label, property);
 
-            // TextField
-            string newPath = EditorGUI.TextField(fieldRect, GUIContent.none, property.stringValue);
-            
-            EditorGUI.EndProperty();
+            EditorGUI.LabelField(labelRect, label);
+            string newValue = EditorGUI.DelayedTextField(fieldRect, GUIContent.none, property.stringValue);
+            if (EditorGUI.EndChangeCheck())
+            {
+                property.stringValue = newValue;
+            }
             
             // Folder button
             if (!string.IsNullOrEmpty(property.stringValue) && AssetDatabase.IsValidFolder(property.stringValue))
@@ -111,7 +110,12 @@ namespace cfUnityEngine.Editor
             {
                 var path = EditorUtility.OpenFilePanel("Select File", "Assets", "");
                 property.stringValue = path.Replace(ApplicationDataPathForReplace, string.Empty).Replace("\\", "/");
+                property.serializedObject.ApplyModifiedProperties();
+                property.serializedObject.Update();
+                GUIUtility.ExitGUI();
             }
+            
+            EditorGUI.EndProperty();
         }
     }
 }
