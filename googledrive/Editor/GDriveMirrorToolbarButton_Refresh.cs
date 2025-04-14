@@ -34,7 +34,7 @@ namespace cfUnityEngine.GoogleDrive
     {
         public GDriveMirrorToolbarButton_Refresh()
         {
-            iconImage = Background.FromTexture2D((Texture2D)EditorGUIUtility.IconContent("Refresh").image);
+            icon = (Texture2D)EditorGUIUtility.IconContent("Refresh").image;
             tooltip = "Refresh GDrive files";
             clicked += () =>
             {
@@ -64,7 +64,7 @@ namespace cfUnityEngine.GoogleDrive
     {
         public GDriveMirrorToolbarButton_ShowSetting()
         {
-            iconImage = Background.FromTexture2D((Texture2D)EditorGUIUtility.IconContent("SettingsIcon").image);
+            icon = (Texture2D)EditorGUIUtility.IconContent("SettingsIcon").image;
             tooltip = "Show Mirror Setting";
             clicked += () =>
             {

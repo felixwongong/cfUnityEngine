@@ -77,36 +77,36 @@ namespace cfUnityEngine.Editor
             var settingList = new ListView(platformSymbols);
             root.Add(settingList);
 
-            settingList.makeItem = () => new ToggleButtonGroup()
-            {
-                allowEmptySelection = true,
-                isMultipleSelection = true,
-            };
-            settingList.bindItem = (ve, idx) =>
-            {
-                var toggleGroup = ve as ToggleButtonGroup;
-                if (toggleGroup == null)
-                {
-                    Debug.LogError("Toggle setting is not a toggle group");
-                    return;
-                }
-
-                foreach (var platformType in (PlatformType[])Enum.GetValues(typeof(PlatformType)))
-                {
-                    if (platformType == PlatformType.None) continue;
-
-                    var button = new Button(() =>
-                    {
-                        var (featureSymbol, platformFlag) = platformSymbols[idx];
-                        platformSymbols[idx] = (featureSymbol, platformFlag ^ platformType);
-                    });
-                    button.text = platformType.GetNamed().TargetName;
-                    toggleGroup.Add(button);
-                }
-
-                toggleGroup.label = platformSymbols[idx].feature;
-                toggleGroup.value = ToggleButtonGroupState.FromEnumFlags(platformSymbols[idx].buildTarget);
-            };
+            // settingList.makeItem = () => new ToggleButtonGroup()
+            // {
+            //     allowEmptySelection = true,
+            //     isMultipleSelection = true,
+            // };
+            // settingList.bindItem = (ve, idx) =>
+            // {
+            //     var toggleGroup = ve as ToggleButtonGroup;
+            //     if (toggleGroup == null)
+            //     {
+            //         Debug.LogError("Toggle setting is not a toggle group");
+            //         return;
+            //     }
+            //
+            //     foreach (var platformType in (PlatformType[])Enum.GetValues(typeof(PlatformType)))
+            //     {
+            //         if (platformType == PlatformType.None) continue;
+            //
+            //         var button = new Button(() =>
+            //         {
+            //             var (featureSymbol, platformFlag) = platformSymbols[idx];
+            //             platformSymbols[idx] = (featureSymbol, platformFlag ^ platformType);
+            //         });
+            //         button.text = platformType.GetNamed().TargetName;
+            //         toggleGroup.Add(button);
+            //     }
+            //
+            //     toggleGroup.label = platformSymbols[idx].feature;
+            //     toggleGroup.value = ToggleButtonGroupState.FromEnumFlags(platformSymbols[idx].buildTarget);
+            // };
         }
     }
 }
