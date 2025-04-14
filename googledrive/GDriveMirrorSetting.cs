@@ -31,6 +31,7 @@ namespace cfUnityEngine.GoogleDrive
                 if (asset == null)
                 {
                     Debug.LogError($"[GDriveMirrorSetting.serviceAccountCredentialJson] Asset is not a TextAsset: {assetPath}");
+                    return string.Empty;
                 }
                 _serviceAccountCredentialJson = asset.text;
                 return _serviceAccountCredentialJson;
