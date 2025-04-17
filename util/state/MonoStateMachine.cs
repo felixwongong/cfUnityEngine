@@ -86,6 +86,11 @@ namespace cfUnityEngine.Util
         {
         }
 
+        public virtual void StartMachine()
+        {
+            
+        }
+
         public void RegisterState([NotNull] TState state)
         {
             if (state == null) throw new ArgumentNullException(nameof(state));

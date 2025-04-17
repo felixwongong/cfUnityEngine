@@ -3,7 +3,7 @@
 
     public abstract class MonoInstance<T> : MonoBehaviour where T : Component
     {
-        public virtual bool persistent => false;
+        public virtual bool dontDestroyOnLoad => false;
         public static Func<T> createMethod => () => new GameObject($"_{typeof(T).Name}").AddComponent<T>();
 
         private static T _instance;
@@ -24,6 +24,6 @@
 
         protected virtual void Awake()
         {
-            if(persistent) DontDestroyOnLoad(this);
+            if(dontDestroyOnLoad) DontDestroyOnLoad(this);
         }
     }

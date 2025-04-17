@@ -3,10 +3,11 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using cfEngine.Asset;
 using cfEngine.Logging;
 using UnityEngine;
 
-namespace cfEngine.Asset
+namespace cfUnityEngine.Asset
 {
     public class ResourceAssetManager : AssetManager<UnityEngine.Object>
     {

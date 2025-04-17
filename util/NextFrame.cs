@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 public class NextFrame: MonoInstance<NextFrame>
 {
-    public override bool persistent => true;
+    public override bool dontDestroyOnLoad => true;
 
     private int nextFrameExecutionActionCount = -1;
     private Queue<Action> _frameAction = new();
