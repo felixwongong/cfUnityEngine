@@ -105,7 +105,7 @@ namespace cfUnityEngine.Util
 
         public bool CanGoToState(TStateId id)
         {
-            return TryGetState(id, out var nextState) && nextState.IsReady() && (_currentState == null || _currentState.Whitelist.Contains(id));
+            return TryGetState(id, out var nextState) && nextState.IsReady() && _currentState == null;
         }
 
         public bool TryGoToState(TStateId nextStateId, in StateParam param = null)

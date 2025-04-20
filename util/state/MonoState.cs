@@ -9,14 +9,12 @@ namespace cfUnityEngine.Util
         where TState : MonoState<TStateId, TState, TStateMachine>
     {
         public abstract TStateId Id { get; }
-        public virtual HashSet<TStateId> Whitelist { get; } = new HashSet<TStateId>();
         
         protected TStateMachine stateMachine { get; private set; }
         
-        public TStateMachine SetStateMachine(TStateMachine stateMachine)
+        public void SetStateMachine(TStateMachine stateMachine)
         {
             this.stateMachine = stateMachine;
-            return stateMachine;
         }
 
         private void Awake() { }
