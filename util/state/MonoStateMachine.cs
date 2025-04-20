@@ -164,7 +164,7 @@ namespace cfUnityEngine.Util
 
                 if (_currentState != null)
                 {
-                    _beforeStateChangeRelay.Dispatch(new StateChangeRecord<TStateId>
+                    _beforeStateChangeRelay?.Dispatch(new StateChangeRecord<TStateId>
                         { LastState = _currentState.Id, NewState = nextState.Id });
 
                     _currentState.OnEndContext();
