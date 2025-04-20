@@ -99,8 +99,8 @@ namespace cfUnityEngine.Util
             {
                 throw new Exception($"State {state.GetType()} already registered");
             }
-            
-            state.StateMachine = (TStateMachine)this;
+
+            state.SetStateMachine((TStateMachine)this);
         }
 
         public bool CanGoToState(TStateId id)

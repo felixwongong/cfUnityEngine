@@ -11,7 +11,13 @@ namespace cfUnityEngine.Util
         public abstract TStateId Id { get; }
         public virtual HashSet<TStateId> Whitelist { get; } = new HashSet<TStateId>();
         
-        public TStateMachine StateMachine { get; internal set; }
+        protected TStateMachine StateMachine { get; private set; }
+        
+        public TStateMachine SetStateMachine(TStateMachine stateMachine)
+        {
+            StateMachine = stateMachine;
+            return stateMachine;
+        }
 
         private void Awake() { }
 
