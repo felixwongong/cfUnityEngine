@@ -27,11 +27,11 @@
         {
             if (scope.@namespace.Equals(childName))
             {
-                scope.SetSource(source);
+                scope.BindSource(source);
                 return scope;
             }
 
-            return scope.SetChildSource(childName, source);
+            return scope.BindChildSource(childName, source);
         }
     }
 }

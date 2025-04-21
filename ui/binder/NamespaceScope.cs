@@ -53,7 +53,7 @@ namespace cfUnityEngine
 #if UNITY_EDITOR
         private Dictionary<string, (IPropertySource, bool)> __cachedSources = new();
 #endif
-        public void SetSource(IPropertySource source)
+        public void BindSource(IPropertySource source)
         {
 #if UNITY_EDITOR
             __cachedSources[@namespace] = (source, true);
@@ -67,10 +67,10 @@ namespace cfUnityEngine
             }
         }
 
-        public INamespaceScope SetChildSource(string childName, IPropertySource source)
+        public INamespaceScope BindChildSource(string childName, IPropertySource source)
         {
             var child = GetChild(childName);
-            child?.SetSource(source);
+            child?.BindSource(source);
 
 #if UNITY_EDITOR
             __cachedSources[childName] = (source, child != null);

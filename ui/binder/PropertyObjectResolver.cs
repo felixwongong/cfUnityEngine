@@ -4,7 +4,7 @@ namespace cfUnityEngine
 {
     public abstract class PropertyResolverBase<TValueType> : MonoBehaviour
     {
-        [SerializeField] private string propertyName;
+        [SerializeField] protected string propertyName;
 
         public void Resolve(string resolveProperty, TValueType value)
         {

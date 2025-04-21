@@ -7,7 +7,7 @@ namespace cfUnityEngine
         public string @namespace { get; }
         public bool isLeaf { get; set; }
         public void Attach(string nsName, INamespaceScope ns);
-        public void SetSource(IPropertySource source);
-        public INamespaceScope SetChildSource(string childName, IPropertySource source);
+        public void BindSource(IPropertySource source);
+        public INamespaceScope BindChildSource(string childName, IPropertySource source);
     }
 }
