@@ -13,9 +13,9 @@ using Object = UnityEngine.Object;
 
 namespace cfUnityEngine.Info
 {
-    public class ScriptableInfo<TInfo> : ScriptableObject
+    public abstract class ScriptableInfo<TInfo> : ScriptableObject
     {
-        public List<TInfo> infos;
+        public abstract List<TInfo> infos { get; }
     }
     
     public class ScriptableObjectLoader<TInfo>: IValueLoader<TInfo>
