@@ -4,6 +4,8 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using cfEngine.Asset;
+using cfEngine.Extension;
+using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
 using Object = UnityEngine.Object;
@@ -14,27 +16,52 @@ namespace cfUnityEngine.Asset
     {
         protected override AssetHandle<T> _Load<T>(string key)
         {
-            var handle = Addressables.LoadAssetAsync<T>(key);
-            handle.WaitForCompletion();
+            if (typeof(Component).IsAssignableFrom(typeof(T)))
+            {
+                var handle = Addressables.LoadAssetAsync<GameObject>(key);
+                handle.WaitForCompletion();
 
-            return new AssetHandle<T>(handle.Result, handle.Release);
+                return new AssetHandle<T>(handle.Result.GetComponent<T>(), handle.Release);
+            }
+            else
+            {
+                var handle = Addressables.LoadAssetAsync<T>(key);
+                handle.WaitForCompletion();
+
+                return new AssetHandle<T>(handle.Result, handle.Release);
+            }
         }
 
         protected override Task<AssetHandle<T>> _LoadAsync<T>(string key, CancellationToken token = default)
         {
-            var handle = Addressables.LoadAssetAsync<T>(key);
+            if (typeof(Component).IsAssignableFrom(typeof(T)))
+            {
+                var handle = _LoadAsync<GameObject>(key, token);
+                return handle.ContinueWith(result =>
+                {
+                    if (result?.Result?.Asset != null && result.Result.Asset.TryGetTarget(out var go) && go.TryGetComponent<T>(out var comp))
+                    {
+                        return new AssetHandle<T>(comp, result.DisposeIfCompleted);
+                    }
+                    
+                    return new AssetHandle<T>(null, result.DisposeIfCompleted);
+                });
+            }
             
             TaskCompletionSource<AssetHandle<T>> loadTaskSource = new();
-            
-            if (token.IsCancellationRequested)
             {
-                handle.Release();
-                loadTaskSource.SetCanceled();
+                var handle = Addressables.LoadAssetAsync<T>(key);
+                
+                if (token.IsCancellationRequested)
+                {
+                    handle.Release();
+                    loadTaskSource.SetCanceled();
+                }
+
+                handle.Completed += OnLoadCompleted;
             }
 
-            handle.Completed += OnLoadCompleted;
-
-            void OnLoadCompleted(AsyncOperationHandle<T> _)
+            void OnLoadCompleted(AsyncOperationHandle<T> handle)
             {
                 handle.Completed -= OnLoadCompleted;
 
