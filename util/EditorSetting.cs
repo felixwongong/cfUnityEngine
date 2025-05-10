@@ -1,7 +1,6 @@
 using System;
 using System.Diagnostics;
 using UnityEditor;
-using UnityEngine;
 using Debug = UnityEngine.Debug;
 
 namespace cfUnityEngine.Util
@@ -17,13 +16,19 @@ namespace cfUnityEngine.Util
             this.fileName = fileName;
         }
     }
-
-    public abstract class EditorSetting<T> : ScriptableObject where T: EditorSetting<T>
+    
+    public abstract class EditorSetting<TSetting> :
+#if ODIN_INSPECTOR
+        Sirenix.OdinInspector.SerializedScriptableObject 
+#else
+        UnityEngine.ScriptableObject 
+#endif 
+        where TSetting: EditorSetting<TSetting>
     {
         private static readonly (string folderPath, string fileName) filePath = GetFilePath();
         private static readonly string[] searchFolder = { filePath.folderPath };
-        private static T _instance;
-        public static T GetSetting()
+        private static TSetting _instance;
+        public static TSetting GetSetting()
         {
             if (_instance != null)
                 return _instance;
@@ -34,7 +39,7 @@ namespace cfUnityEngine.Util
             var guids = AssetDatabase.FindAssets($"{filePath.fileName} t:ScriptableObject", searchFolder);
             if (guids.Length <= 0)
             {
-                AssetDatabase.CreateAsset(CreateInstance<T>(), $"{filePath.folderPath}/{filePath.fileName}.asset");
+                AssetDatabase.CreateAsset(CreateInstance<TSetting>(), $"{filePath.folderPath}/{filePath.fileName}.asset");
                 guids = AssetDatabase.FindAssets($"{filePath.fileName} t:ScriptableObject", searchFolder);
                 if (guids.Length == 0)
                 {
@@ -54,16 +59,16 @@ namespace cfUnityEngine.Util
                 return null;
             }
 
-            _instance = AssetDatabase.LoadAssetAtPath<T>(assetPath);
+            _instance = AssetDatabase.LoadAssetAtPath<TSetting>(assetPath);
             return _instance;
         }
 
         private static (string folderPath, string fileName) GetFilePath()
         {
-            var attributes = typeof(T).GetCustomAttributes(typeof(FilePathAttribute), true);
+            var attributes = typeof(TSetting).GetCustomAttributes(typeof(FilePathAttribute), true);
             if (attributes.Length == 0 || attributes[0] is not FilePathAttribute filePath)
             {
-                Debug.Log($"[EditorSetting.GetFilePath] Setting type {typeof(T).Name} does not have [FilePath] attribute implemented");
+                Debug.Log($"[EditorSetting.GetFilePath] Setting type {typeof(TSetting).Name} does not have [FilePath] attribute implemented");
                 return (string.Empty, string.Empty);
             }
 
