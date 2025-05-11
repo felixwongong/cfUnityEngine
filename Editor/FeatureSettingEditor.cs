@@ -19,7 +19,7 @@ namespace cfUnityEngine.Editor
             "CF_REACTIVE_DEBUG"
         };
 
-        [MenuItem("Cf Tools/Feature Setting")]
+        [MenuItem("Cf Tools/Editor Setting/Feature Setting")]
         public static void ShowPanel()
         {
             CfFeatureSettingEditor wnd = GetWindow<CfFeatureSettingEditor>();
