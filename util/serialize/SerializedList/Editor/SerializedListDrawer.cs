@@ -10,7 +10,7 @@ namespace cfUnityEngine.Util.Editor
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
             var serializedList = property.FindPropertyRelative("_serializedList");
-            EditorGUILayout.PropertyField(serializedList);
+            EditorGUILayout.PropertyField(serializedList, new GUIContent(property.displayName));
         }
     }
 }
