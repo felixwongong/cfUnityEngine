@@ -1,6 +1,7 @@
 using System;
 using System.Diagnostics;
 using UnityEditor;
+using UnityEngine;
 using Debug = UnityEngine.Debug;
 
 namespace cfUnityEngine.Util
@@ -17,13 +18,7 @@ namespace cfUnityEngine.Util
         }
     }
     
-    public abstract class EditorSetting<TSetting> :
-#if ODIN_INSPECTOR
-        Sirenix.OdinInspector.SerializedScriptableObject 
-#else
-        UnityEngine.ScriptableObject 
-#endif 
-        where TSetting: EditorSetting<TSetting>
+    public abstract class EditorSetting<TSetting> : ScriptableObject where TSetting: EditorSetting<TSetting>
     {
         private static readonly (string folderPath, string fileName) filePath = GetFilePath();
         private static readonly string[] searchFolder = { filePath.folderPath };
