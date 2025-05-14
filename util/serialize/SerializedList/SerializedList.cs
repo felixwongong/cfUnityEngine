@@ -14,7 +14,7 @@ namespace cfUnityEngine.Util
     {
         private List<T> _list;
         [SerializeField]
-        private List<ItemWrapper> _serializedList;
+        private List<Serialized<T>> _serializedList;
         
         public SerializedList()
         {
@@ -40,51 +40,8 @@ namespace cfUnityEngine.Util
         public T this[int index] { get => _list[index]; set => _list[index] = value; }
         public void EnsureCapacity(int capacity) { _list.EnsureCapacity(capacity); }
 
-        [Serializable]
-        public class ItemWrapper
-        {
-            public string typeAssemblyName;
-            [SerializeReference]
-            public object listObject;
-        }
-
-        
         public void OnBeforeSerialize()
         {
-            if (_serializedList != null)
-            {
-                foreach (var serializedSetting in _serializedList)
-                {
-                    var type = EnsureGetInheritedType(typeof(T), serializedSetting.typeAssemblyName);
-                    if (!type.AssemblyQualifiedName.Equals(serializedSetting.typeAssemblyName))
-                    {
-                        serializedSetting.typeAssemblyName = type.AssemblyQualifiedName;
-                    }
-
-                    if (serializedSetting.listObject == null)
-                    {
-                        serializedSetting.listObject = Activator.CreateInstance(type);
-                        continue;
-                    }
-
-                    var listObjectType = serializedSetting.listObject.GetType();
-                    if (listObjectType != type)
-                    {
-                        var newObject = Activator.CreateInstance(type);
-                        var fields = listObjectType.GetFields(BindingFlags.Default | BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-                        foreach (var field in fields)
-                        {
-                            var value = field.GetValue(serializedSetting.listObject);
-                            var newField = type.GetField(field.Name, BindingFlags.Default | BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-                            if (newField != null)
-                            {
-                                newField.SetValue(newObject, value);
-                            }
-                        }
-                        serializedSetting.listObject = newObject;
-                    }
-                }
-            }
         }
 
         public void OnAfterDeserialize()
@@ -106,18 +63,6 @@ namespace cfUnityEngine.Util
                     }
                 }
             }
-        }
-        
-        private Type EnsureGetInheritedType([NotNull] Type baseType, string inheritedTypeName)
-        {
-            if (string.IsNullOrEmpty(inheritedTypeName))
-                return baseType;
-            
-            var type = Type.GetType(inheritedTypeName);
-            if (type == null)
-                return baseType;
-
-            return baseType.IsAssignableFrom(type) ? type : baseType;
         }
     }
 }

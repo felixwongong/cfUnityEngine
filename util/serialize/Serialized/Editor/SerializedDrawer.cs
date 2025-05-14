@@ -8,8 +8,8 @@ using Object = UnityEngine.Object;
 
 namespace cfUnityEngine.Util.Editor
 {
-    [CustomPropertyDrawer(typeof(SerializedList<>.ItemWrapper))]
-    public class SerializedListItemWrapperDrawer: PropertyDrawer
+    [CustomPropertyDrawer(typeof(Serialized<>))]
+    public class SerializedDrawer: PropertyDrawer
     {
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
@@ -38,10 +38,11 @@ namespace cfUnityEngine.Util.Editor
                 }
                 
                 listObjectProperty.Next(true);
+                var depth = listObjectProperty.depth;
                 do
                 {
                     EditorGUI.PropertyField( new Rect(position.x, position.y + (EditorGUIUtility.singleLineHeight + EditorGUIUtility.standardVerticalSpacing) * lineHeight++, position.width, EditorGUIUtility.singleLineHeight), listObjectProperty);
-                } while (listObjectProperty.Next(false));
+                } while (listObjectProperty.Next(false) && listObjectProperty.depth == depth);
 
                 property.serializedObject.ApplyModifiedProperties();
             }
@@ -57,10 +58,11 @@ namespace cfUnityEngine.Util.Editor
                 totalLine += 1; //typeAssemblyName
                 var listObjectProperty = property.FindPropertyRelative("listObject");
                 listObjectProperty.Next(true);
+                var depth = listObjectProperty.depth;
                 do
                 {
                     totalLine += 1;
-                } while (listObjectProperty.Next(false));
+                } while (listObjectProperty.Next(false) && listObjectProperty.depth == depth);
             }
             return totalLine * EditorGUIUtility.singleLineHeight + EditorGUIUtility.standardVerticalSpacing * (totalLine - 1);
         }
