@@ -15,6 +15,8 @@ namespace cfUnityEngine.Util.Editor
         {
             EditorGUI.BeginProperty(position, label, property);
             
+            var typeAssemblyNameProperty = property.FindPropertyRelative("typeAssemblyName");
+            var listObjectType = Type.GetType(typeAssemblyNameProperty.stringValue);
             var listObjectProperty = property.FindPropertyRelative("listObject");
             var idProperty = listObjectProperty.FindPropertyRelative("id");
             var foldoutName = idProperty != null ? idProperty.stringValue : listObjectProperty.name;
@@ -23,9 +25,7 @@ namespace cfUnityEngine.Util.Editor
 
             if (property.isExpanded)
             {
-                var typeAssemblyNameProperty = property.FindPropertyRelative("typeAssemblyName");
-                var listObject = listObjectProperty.managedReferenceValue;
-                var listObjectTypes = GetAllPossibleListObjectTypes(listObject.GetType());
+                var listObjectTypes = GetAllPossibleListObjectTypes(listObjectType);
                 var selectedIndex = Array.IndexOf(listObjectTypes, Type.GetType(typeAssemblyNameProperty.stringValue));
                 
                 int lineHeight = 1;
@@ -37,7 +37,9 @@ namespace cfUnityEngine.Util.Editor
                     typeAssemblyNameProperty.serializedObject.ApplyModifiedProperties();
                 }
                 
-                listObjectProperty.Next(true);
+                if (!listObjectProperty.Next(true))
+                    return;
+                
                 var depth = listObjectProperty.depth;
                 do
                 {
@@ -57,7 +59,9 @@ namespace cfUnityEngine.Util.Editor
             {
                 totalLine += 1; //typeAssemblyName
                 var listObjectProperty = property.FindPropertyRelative("listObject");
-                listObjectProperty.Next(true);
+                if (!listObjectProperty.Next(true))
+                    return totalLine * EditorGUIUtility.singleLineHeight + EditorGUIUtility.standardVerticalSpacing * (totalLine - 1);
+                
                 var depth = listObjectProperty.depth;
                 do
                 {
@@ -81,7 +85,7 @@ namespace cfUnityEngine.Util.Editor
                 var typeList = new List<Type>();
                 foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
                 {
-                    typeList.AddRange(TypeExtension.FindDerivedTypes(assembly, baseType));
+                    typeList.AddRange(TypeExtension.FindDerivedTypes(assembly, baseType).Where(t => !t.IsAbstract && !t.IsInterface));
                 }
 
                 types = typeList.ToArray();

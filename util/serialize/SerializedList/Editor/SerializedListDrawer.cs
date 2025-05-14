@@ -16,8 +16,9 @@ namespace cfUnityEngine.Util.Editor
 
             _property = property;
             _listProperty = property.FindPropertyRelative("_serializedList");
-            
-            list = new ReorderableList(_listProperty.serializedObject, _listProperty, true, true, true, true);
+
+            var isReadOnly = fieldInfo.GetCustomAttributes(typeof(SerializedList.ReadOnlyAttribute), true).Length > 0;
+            list = new ReorderableList(_listProperty.serializedObject, _listProperty, true, true, !isReadOnly, !isReadOnly);
 
             list.drawHeaderCallback += DrawHeader;
             list.drawElementCallback += DrawListItems;
@@ -31,6 +32,9 @@ namespace cfUnityEngine.Util.Editor
         private float GetElementPropertyHeight(int index)
         {
             var element = _listProperty.GetArrayElementAtIndex(index);
+            if(element == null)
+                return 0f;
+            
             return EditorGUI.GetPropertyHeight(element, true) + EditorGUIUtility.standardVerticalSpacing;
         }
 

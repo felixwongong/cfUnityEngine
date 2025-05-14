@@ -10,7 +10,7 @@ using Object = System.Object;
 namespace cfUnityEngine.Util
 {
     [Serializable]
-    public class SerializedList<T>: IList<T>, ISerializationCallbackReceiver where T: class
+    public partial class SerializedList<T>: IList<T>, ISerializationCallbackReceiver where T: class
     {
         private List<T> _list;
         [SerializeField]
@@ -18,11 +18,12 @@ namespace cfUnityEngine.Util
         
         public SerializedList()
         {
+            _list = new();
         }
 
-        public SerializedList(int capacity): this()
+        public SerializedList(int capacity)
         {
-            _list ??= new List<T>(capacity);
+            _list = new List<T>(capacity);
         }
         
         public IEnumerator<T> GetEnumerator() => _list.GetEnumerator();

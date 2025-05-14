@@ -17,7 +17,7 @@ namespace cfUnityEngine.Util
             var type = EnsureGetInheritedType(typeof(T), typeAssemblyName);
             if (type.IsInterface)
             {
-                typeAssemblyName = string.Empty;
+                typeAssemblyName = typeof(T).AssemblyQualifiedName;
                 return;
             } 
             
