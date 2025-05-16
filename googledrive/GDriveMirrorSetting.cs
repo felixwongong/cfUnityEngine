@@ -11,7 +11,7 @@ using UnityEngine;
 namespace cfUnityEngine.GoogleDrive
 {
     [Util.FilePath("Assets/GoogleDrive", "MirrorSetting")]
-    public class GDriveMirrorSetting : EditorSetting<GDriveMirrorSetting>
+    public partial class GDriveMirrorSetting : EditorSetting<GDriveMirrorSetting>
     {
         [AssetPath]
         [SerializeField] private string _serviceAccountCredentialJsonPath;
