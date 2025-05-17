@@ -162,11 +162,16 @@ namespace cfUnityEngine.Command
     
     public static class CommandSearchLauncher
     {
+        private static ISearchView _searchView; 
+        
         [MenuItem("Cf Tools/Command Search")]
         [Shortcut("Cf Tools/Search Command", KeyCode.Tab, ShortcutModifiers.Shift)]
         public static void OpenCommandSearch()
         {
-            SearchService.ShowContextual("cmd", "Command", null, null, null, null, null, null);
+            if (_searchView != null)
+                _searchView.Close();
+            
+            _searchView = SearchService.ShowContextual("cmd", "Command", null, null, null, null, null, null);
         }
     }
 }
