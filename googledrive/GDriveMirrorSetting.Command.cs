@@ -8,9 +8,12 @@ namespace cfUnityEngine.GoogleDrive
 {
     public partial class GDriveMirrorSetting
     {
+        [CommandService.RegisterOnInitialized(nameof(Register))]
         [ICommand.Hint("Show Google Drive Mirror Setting")]
         public struct ShowCommand : ICommand
         {
+            public static void Register() => CommandService.RegisterCommand(new ShowCommand(), "setting", "googledrive");
+            
             public void Execute(IReadOnlyDictionary<string, string> args)
             {
                 var setting = GetSetting();
@@ -26,11 +29,6 @@ namespace cfUnityEngine.GoogleDrive
                     }
                 }
             }
-        }
-
-        private void OnEnable()
-        {
-            CommandService.RegisterCommand(new ShowCommand(), "setting", "googledrive");
         }
     }
 }
