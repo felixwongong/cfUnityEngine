@@ -2,7 +2,8 @@
     "name": "cfUnityEngine.Command",
     "rootNamespace": "",
     "references": [
-        "cfUnityEngine"
+        "cfUnityEngine",
+        "cfEngine"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
