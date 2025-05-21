@@ -12,10 +12,10 @@ namespace cfUnityEngine.Util
         where TStateMachine : MonoStateMachine<TStateId, TState, TStateMachine>
         where TState: MonoState<TStateId, TState, TStateMachine>
     {
-        private TState _lastState;
-        private TState _currentState;
-        public TStateId LastStateId => _lastState.Id;
-        public TStateId CurrentStateId => _currentState.Id;
+        protected TState lastState { get; private set; }
+        protected TState currentState { get; private set; }
+        public TStateId lastStateId => lastState.Id;
+        public TStateId currentStateId => currentState.Id;
 
         private readonly Dictionary<TStateId, TState> _stateDictionary = new();
 
@@ -76,9 +76,9 @@ namespace cfUnityEngine.Util
         private void Update()
         {
             _Update();
-            if (_currentState != null && _currentState.CanUpdate())
+            if (currentState != null && currentState.CanUpdate())
             {
-                _currentState._Update();
+                currentState._Update();
             }
         }
 
@@ -105,7 +105,7 @@ namespace cfUnityEngine.Util
 
         public bool CanGoToState(TStateId id)
         {
-            return TryGetState(id, out var nextState) && nextState.IsReady() && _currentState == null;
+            return TryGetState(id, out var nextState) && nextState.IsReady() && currentState == null;
         }
 
         public bool TryGoToState(TStateId nextStateId, in StateParam param = null)
@@ -121,28 +121,28 @@ namespace cfUnityEngine.Util
                 if (!CanGoToState(nextState.Id))
                 {
                     Log.LogException(new ArgumentException(
-                        $"Cannot go to state {nextState.Id}, not in current state {_currentState.Id} whitelist"));
+                        $"Cannot go to state {nextState.Id}, not in current state {currentState.Id} whitelist"));
                     return false;
                 }
 
-                if (_currentState != null)
+                if (currentState != null)
                 {
                     _beforeStateChangeRelay?.Dispatch(new StateChangeRecord<TStateId>
-                        { LastState = _currentState.Id, NewState = nextState.Id });
+                        { LastState = currentState.Id, NewState = nextState.Id });
 
-                    _currentState.OnEndContext();
-                    _currentState.enabled = false;
-                    _lastState = _currentState;
+                    currentState.OnEndContext();
+                    currentState.enabled = false;
+                    lastState = currentState;
                 }
 
-                _currentState = nextState;
-                _currentState.enabled = true;
-                if (_lastState != null)
+                currentState = nextState;
+                currentState.enabled = true;
+                if (lastState != null)
                 {
                     _afterStateChangeRelay?.Dispatch(new StateChangeRecord<TStateId>
-                        { LastState = _lastState.Id, NewState = _currentState.Id });
+                        { LastState = lastState.Id, NewState = currentState.Id });
                 }
-                _currentState.StartContext(param);
+                currentState.StartContext(param);
                 return true;
             }
             catch (Exception ex)
@@ -162,24 +162,24 @@ namespace cfUnityEngine.Util
                     return;
                 }
 
-                if (_currentState != null)
+                if (currentState != null)
                 {
                     _beforeStateChangeRelay?.Dispatch(new StateChangeRecord<TStateId>
-                        { LastState = _currentState.Id, NewState = nextState.Id });
+                        { LastState = currentState.Id, NewState = nextState.Id });
 
-                    _currentState.OnEndContext();
-                    _currentState.enabled = false;
-                    _lastState = _currentState;
+                    currentState.OnEndContext();
+                    currentState.enabled = false;
+                    lastState = currentState;
                 }
 
-                _currentState = nextState;
-                _currentState.enabled = true;
-                if (_lastState != null)
+                currentState = nextState;
+                currentState.enabled = true;
+                if (lastState != null)
                 {
                     _afterStateChangeRelay?.Dispatch(new StateChangeRecord<TStateId>
-                        { LastState = _lastState.Id, NewState = _currentState.Id });
+                        { LastState = lastState.Id, NewState = currentState.Id });
                 }
-                _currentState.StartContext(param);
+                currentState.StartContext(param);
             }
             catch (Exception ex)
             {
