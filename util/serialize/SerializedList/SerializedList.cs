@@ -47,13 +47,21 @@ namespace cfUnityEngine.Util
 
         public void OnAfterDeserialize()
         {
+            var listObjectField = typeof(Serialized<T>).GetField("_listObject", BindingFlags.Instance | BindingFlags.NonPublic);
+            if (listObjectField == null)
+            {
+                Debug.LogError("SerializedList: Cannot find field '_listObject' in Serialized<T> class. Make sure the Serialized<T> class is properly defined.");
+                return;
+            }
+            
             if (_serializedList != null)
             {
                 _list ??= new List<T>();
                 _list.EnsureCapacity(_serializedList.Count);
                 for (var i = 0; i < _serializedList.Count; i++)
                 {
-                    var item = (T)_serializedList[i].listObject;
+                    
+                    var item = (T)listObjectField.GetValue(_serializedList[i]);
                     if (_list.Count <= i)
                     {
                         _list.Add(item);

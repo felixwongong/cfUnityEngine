@@ -10,7 +10,9 @@ namespace cfUnityEngine.Util
     {
         public string typeAssemblyName;
         [SerializeReference]
-        public object listObject;
+        private object _listObject;
+        public bool HasValue => _listObject != null;
+        public T Value { get; private set; }
 
         public void OnBeforeSerialize()
         {
@@ -26,34 +28,34 @@ namespace cfUnityEngine.Util
                 typeAssemblyName = type.AssemblyQualifiedName;
             }
 
-            if (listObject == null)
+            if (_listObject == null)
             {
-                listObject = Activator.CreateInstance(type);
+                _listObject = Activator.CreateInstance(type);
                 return;
             }
 
-            var listObjectType = listObject.GetType();
+            var listObjectType = _listObject.GetType();
             if (listObjectType != type)
             {
                 var newObject = Activator.CreateInstance(type);
                 var fields = listObjectType.GetFields(BindingFlags.Default | BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
                 foreach (var field in fields)
                 {
-                    var value = field.GetValue(listObject);
+                    var value = field.GetValue(_listObject);
                     var newField = type.GetField(field.Name, BindingFlags.Default | BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
                     if (newField != null)
                     {
                         newField.SetValue(newObject, value);
                     }
                 }
-                listObject = newObject;
+                _listObject = newObject;
             }
         }
 
         public void OnAfterDeserialize()
         {
+            Value = _listObject is not T t ? default : t;
         }
-        
         
         private Type EnsureGetInheritedType([NotNull] Type baseType, string inheritedTypeName)
         {

@@ -17,7 +17,7 @@ namespace cfUnityEngine.Util.Editor
             
             var typeAssemblyNameProperty = property.FindPropertyRelative("typeAssemblyName");
             var listObjectType = Type.GetType(typeAssemblyNameProperty.stringValue);
-            var listObjectProperty = property.FindPropertyRelative("listObject");
+            var listObjectProperty = property.FindPropertyRelative("_listObject");
             var idProperty = listObjectProperty.FindPropertyRelative("id");
             var foldoutName = idProperty != null ? idProperty.stringValue : listObjectProperty.name;
             
@@ -58,7 +58,7 @@ namespace cfUnityEngine.Util.Editor
             if (property.isExpanded)
             {
                 totalLine += 1; //typeAssemblyName
-                var listObjectProperty = property.FindPropertyRelative("listObject");
+                var listObjectProperty = property.FindPropertyRelative("_listObject");
                 if (!listObjectProperty.Next(true))
                     return totalLine * EditorGUIUtility.singleLineHeight + EditorGUIUtility.standardVerticalSpacing * (totalLine - 1);
                 
