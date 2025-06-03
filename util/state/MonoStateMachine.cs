@@ -18,6 +18,7 @@ namespace cfUnityEngine.Util
         public TStateId currentStateId => currentState.Id;
 
         private readonly Dictionary<TStateId, TState> _stateDictionary = new();
+        protected IEnumerable<TState> allState => _stateDictionary.Values;
 
         #region Relay & Events (OnBeforeStateChange[Once], OnAfterStateChange[Once]);
 
