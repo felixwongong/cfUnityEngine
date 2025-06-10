@@ -9,8 +9,9 @@ namespace cfUnityEngine.Util
         where TState : MonoState<TStateId, TState, TStateMachine>
     {
         public abstract TStateId Id { get; }
-        
         protected TStateMachine stateMachine { get; private set; }
+        
+        [SerializeField] private GameObject[] stateObjects;
         
         public void SetStateMachine(TStateMachine stateMachine)
         {
@@ -23,7 +24,16 @@ namespace cfUnityEngine.Util
 
         private void Update() { }
 
-        public virtual void _Awake() { }
+        public virtual void _Awake()
+        {
+            if (stateObjects != null)
+            {
+                foreach (var stateObject in stateObjects)
+                {
+                    stateObject.SetActive(false);
+                }
+            }
+        }
 
         public virtual void _Start() { }
 
@@ -31,10 +41,34 @@ namespace cfUnityEngine.Util
 
         public virtual bool IsReady() => true;
         public virtual bool CanUpdate() => true;
-        
-        protected internal abstract void StartContext(StateParam param);
 
-        protected internal virtual void OnEndContext()
+        internal void StartContext(StateParam param)
+        {
+            if (stateObjects != null)
+            {
+                foreach (var stateObject in stateObjects)
+                {
+                    stateObject.SetActive(true);
+                }
+            }
+            _StartContext(param);
+        }
+        
+        protected abstract void _StartContext(StateParam param);
+
+        internal void OnEndContext()
+        {
+            _OnEndContext();
+            if (stateObjects != null)
+            {
+                foreach (var stateObject in stateObjects)
+                {
+                    stateObject.SetActive(false);
+                }
+            }
+        }
+        
+        protected virtual void _OnEndContext()
         {
         }
     }
