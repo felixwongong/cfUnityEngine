@@ -11,12 +11,12 @@ using UnityEngine.UIElements;
 namespace cfUnityEngine.GoogleDrive
 {
     [EditorTool("Drive")]
-    class GoogleDriveTool : EditorTool
+    class GoogleDriveEditorTool : EditorTool
     {
        
     }
    
-    [CustomEditor(typeof(GoogleDriveTool))]
+    [CustomEditor(typeof(GoogleDriveEditorTool))]
     class GoogleDriveToolEditor : UnityEditor.Editor, ICreateToolbar
     {
         public IEnumerable<string> toolbarElements
