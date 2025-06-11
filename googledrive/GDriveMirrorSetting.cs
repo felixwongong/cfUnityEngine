@@ -90,7 +90,8 @@ namespace cfUnityEngine.GoogleDrive
                     
                     if(!_mirrorMap.TryAdd(item.googleDriveId, item))
                     {
-                        Debug.LogError($"Duplicate googleDriveId {item.googleDriveId}");
+                        var existing = _mirrorMap[item.googleDriveId];
+                        Debug.LogError($"Duplicate googleDriveId ({item.googleDriveId}) found for ({existing.assetFolderPath}) and ({item.assetFolderPath}), ");
                     }
                 }
             }
