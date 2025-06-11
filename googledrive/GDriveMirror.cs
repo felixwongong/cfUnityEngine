@@ -8,6 +8,7 @@ using Google.Apis.Download;
 using Google.Apis.Drive.v3;
 using Google.Apis.Drive.v3.Data;
 using Google.Apis.Services;
+using JetBrains.Annotations;
 
 namespace cfUnityEngine.GoogleDrive
 {
@@ -27,8 +28,9 @@ namespace cfUnityEngine.GoogleDrive
     
     public interface IFileMirrorHandler
     {
-        IAsyncEnumerable<RefreshStatus> RefreshFilesAsync(FilesResource filesResource, IReadOnlyList<File> googleFiles);
-        void RefreshFiles(FilesResource filesResource, IEnumerable<File> googleFiles);
+        IAsyncEnumerable<RefreshStatus> RefreshFilesAsync(FilesResource filesResource, IReadOnlyList<File> googleFiles, [NotNull] IReadOnlyDictionary<string, MirrorItem> settingMap);
+        void RefreshFiles(FilesResource filesResource, IEnumerable<File> googleFiles, [NotNull] IReadOnlyDictionary<string, MirrorItem> settingMap);
+        void ClearAssetDirectories(IEnumerable<string> assetFolderPaths);
     }
 
 
@@ -62,14 +64,32 @@ namespace cfUnityEngine.GoogleDrive
                 HttpClientInitializer = credential
             });
         }
-
+        
         private FilesResource.ListRequest GetServiceRequests(DriveService service)
         {
             var request = service.Files.List();
             request.Fields = "files(id, name, mimeType, createdTime, modifiedTime, size, owners)";
             return request;
-        }  
+        }
 
+        public IAsyncEnumerable<RefreshStatus> ClearAllAndRefreshAsync()
+        {
+            var setting = GDriveMirrorSetting.GetSetting();
+            var folderPaths = setting.mirrorMap.Values.Select(mirrorItem => mirrorItem.assetFolderPath).ToArray();
+            _mirrorHandler.ClearAssetDirectories(folderPaths);
+            _logger.LogInfo($"[GDriveMirror.ClearAllAndRefreshAsync] cleared all asset directories, Folders: {string.Join(',', folderPaths)}");
+            return RefreshAsync();
+        }
+        
+        public void ClearAllAndRefresh()
+        {
+            var setting = GDriveMirrorSetting.GetSetting();
+            var folderPaths = setting.mirrorMap.Values.Select(mirrorItem => mirrorItem.assetFolderPath).ToArray();
+            _mirrorHandler.ClearAssetDirectories(folderPaths);
+            _logger.LogInfo($"[GDriveMirror.ClearAllAndRefresh] cleared all asset directories, Folders: {string.Join('\n', folderPaths)}");
+            Refresh();
+        }
+        
         public async IAsyncEnumerable<RefreshStatus> RefreshAsync()
         {
             _logger.LogInfo("[GDriveMirror.RefreshAsync] start refresh files");
@@ -83,8 +103,9 @@ namespace cfUnityEngine.GoogleDrive
             if(request == null) yield break;
             
             var response = await request.ExecuteAsync(_refreshCancelToken.Token);
-            
-            await foreach (var status in _mirrorHandler.RefreshFilesAsync(service.Files, response.Files.ToArray()))
+
+            var setting = GDriveMirrorSetting.GetSetting();
+            await foreach (var status in _mirrorHandler.RefreshFilesAsync(service.Files, response.Files.ToArray(), setting.mirrorMap))
             {
                 yield return status;
             }
@@ -105,7 +126,9 @@ namespace cfUnityEngine.GoogleDrive
             if(request == null) return;
 
             var response = request.Execute();
-            _mirrorHandler.RefreshFiles(service.Files, response.Files);
+            
+            var setting = GDriveMirrorSetting.GetSetting();
+            _mirrorHandler.RefreshFiles(service.Files, response.Files, setting.mirrorMap);
             _logger.LogInfo("[GDriveMirror.Refresh] refresh files succeed");
         }
     }

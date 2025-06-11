@@ -32,5 +32,23 @@ namespace cfUnityEngine.GoogleDrive
 
             EditorUtility.ClearProgressBar();
         }
+
+        public async Task ClearAllAndRefreshWithProgressBar()
+        {
+            EditorUtility.DisplayProgressBar("GDriveMirror", "Refreshing Google Files...", 0f);
+            try
+            {
+                await foreach (var status in ClearAllAndRefreshAsync())
+                {
+                    EditorUtility.DisplayProgressBar("GDriveMirror", $"Google File refreshed, file: {status.file.Name}, status: {status.status.Status.ToString()}", status.progress);
+                }
+            }
+            catch (Exception e)
+            {
+                Debug.LogException(e);
+            }
+
+            EditorUtility.ClearProgressBar();
+        }
     }
 }

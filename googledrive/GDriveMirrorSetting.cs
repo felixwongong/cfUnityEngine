@@ -60,6 +60,23 @@ namespace cfUnityEngine.GoogleDrive
                 }
             });
         }
+        
+        [MethodButton]
+        private void ClearAllAndRefresh()
+        {
+            Debug.Log("[GDriveMirrorSetting.ClearAllAndRefresh] clear all and refresh started");
+            GDriveMirror.instance.ClearAllAndRefreshWithProgressBar().ContinueWith(task =>
+            {
+                if (task.IsFaulted)
+                {
+                    Debug.LogError($"[GDriveMirrorSetting.ClearAllAndRefresh] clear all and refresh failed: {task.Exception}");
+                }
+                else
+                {
+                    Debug.Log("[GDriveMirrorSetting.ClearAllAndRefresh] clear all and refresh succeed");
+                }
+            });
+        }
 
         private void OnValidate()
         {
@@ -85,8 +102,7 @@ namespace cfUnityEngine.GoogleDrive
     {
         public string assetFolderPath;
         public string googleDriveId;
-        [ReadOnly]
-        public string optionalLocalAssetName;
+        public string assetNameOverride;
     }
 }
 
