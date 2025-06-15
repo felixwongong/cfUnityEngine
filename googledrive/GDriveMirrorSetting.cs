@@ -86,12 +86,18 @@ namespace cfUnityEngine.GoogleDrive
                 
                 foreach (var item in items)
                 {
-                    if (string.IsNullOrEmpty(item.googleDriveId)) continue;
-                    
-                    if(!_mirrorMap.TryAdd(item.googleDriveId, item))
+                    if (string.IsNullOrEmpty(item.googleDriveLink)) continue;
+                    var googleFileId = GoogleDriveUtil.ExtractFileId(item.googleDriveLink);
+                    if (string.IsNullOrEmpty(googleFileId))
                     {
-                        var existing = _mirrorMap[item.googleDriveId];
-                        Debug.LogError($"Duplicate googleDriveId ({item.googleDriveId}) found for ({existing.assetFolderPath}) and ({item.assetFolderPath}), ");
+                        Debug.LogError($"Invalid googleDriveLink: {item.googleDriveLink}");
+                        continue;
+                    }
+                    
+                    if(!_mirrorMap.TryAdd(googleFileId, item))
+                    {
+                        var existing = _mirrorMap[item.googleDriveLink];
+                        Debug.LogError($"Duplicate googleDriveId ({item.googleDriveLink}) found for ({existing.assetFolderPath}) and ({item.assetFolderPath}), ");
                     }
                 }
             }
@@ -102,8 +108,8 @@ namespace cfUnityEngine.GoogleDrive
     public class MirrorItem
     {
         public string assetFolderPath;
-        [GoogleDriveId]
-        public string googleDriveId;
+        [UrlLink]
+        public string googleDriveLink;
         public string assetNameOverride;
     }
 }
