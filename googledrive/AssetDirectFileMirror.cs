@@ -120,16 +120,13 @@ namespace cfUnityEngine.GoogleDrive
             switch (progress.Status)
             {
                 case DownloadStatus.Completed:
-                    Debug.Log(
-                        $"[AssetDirectFileMirror.RefreshFiles] Download completed, google file: {googleFile.Name}");
+                    Debug.Log($"[AssetDirectFileMirror.RefreshFiles] Download completed, google file: {googleFile.Name}");
                     break;
                 case DownloadStatus.Failed:
-                    Debug.LogError(
-                        $"[AssetDirectFileMirror.RefreshFiles] Download failed, google file: {googleFile.Name}, status: {progress.Status}");
+                    Debug.LogError($"[AssetDirectFileMirror.RefreshFiles] Download failed, google file: {googleFile.Name}, status: {progress.Status}\n Error: {progress.Exception?.Message}");
                     break;
                 default:
-                    Debug.LogWarning(
-                        $"[AssetDirectFileMirror.RefreshFiles] Download status: {progress.Status}, google file: {googleFile.WritersCanShare}");
+                    Debug.LogWarning($"[AssetDirectFileMirror.RefreshFiles] Download status: {progress.Status}, google file: {googleFile.WritersCanShare}");
                     break;
             }
         }

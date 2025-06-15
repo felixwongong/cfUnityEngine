@@ -81,15 +81,6 @@ namespace cfUnityEngine.GoogleDrive
             return RefreshAsync();
         }
         
-        public void ClearAllAndRefresh()
-        {
-            var setting = GDriveMirrorSetting.GetSetting();
-            var folderPaths = setting.mirrorMap.Values.Select(mirrorItem => mirrorItem.assetFolderPath).ToArray();
-            _mirrorHandler.ClearAssetDirectories(folderPaths);
-            _logger.LogInfo($"[GDriveMirror.ClearAllAndRefresh] cleared all asset directories, Folders: {string.Join('\n', folderPaths)}");
-            Refresh();
-        }
-        
         public async IAsyncEnumerable<RefreshStatus> RefreshAsync()
         {
             _logger.LogInfo("[GDriveMirror.RefreshAsync] start refresh files");
