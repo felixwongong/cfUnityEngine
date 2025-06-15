@@ -65,17 +65,18 @@ namespace cfUnityEngine.GoogleDrive
         private void ClearAllAndRefresh()
         {
             Debug.Log("[GDriveMirrorSetting.ClearAllAndRefresh] clear all and refresh started");
-            GDriveMirror.instance.ClearAllAndRefreshWithProgressBar().ContinueWith(task =>
-            {
-                if (task.IsFaulted)
-                {
-                    Debug.LogError($"[GDriveMirrorSetting.ClearAllAndRefresh] clear all and refresh failed: {task.Exception}");
-                }
-                else
-                {
-                    Debug.Log("[GDriveMirrorSetting.ClearAllAndRefresh] clear all and refresh succeed");
-                }
-            });
+            GDriveMirror.instance.Refresh();
+            //GDriveMirror.instance.ClearAllAndRefreshWithProgressBar().ContinueWith(task =>
+            //{
+            //    if (task.IsFaulted)
+            //    {
+            //        Debug.LogError($"[GDriveMirrorSetting.ClearAllAndRefresh] clear all and refresh failed: {task.Exception}");
+            //    }
+            //    else
+            //    {
+            //        Debug.Log("[GDriveMirrorSetting.ClearAllAndRefresh] clear all and refresh succeed");
+            //    }
+            //});
         }
 
         private void OnValidate()

@@ -10,7 +10,13 @@ namespace cfUnityEngine.Editor
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
             var textFieldRect = new Rect(position.x, position.y, position.width - buttonWidth, EditorGUIUtility.singleLineHeight);
+            EditorGUI.BeginChangeCheck();
             EditorGUI.PropertyField(textFieldRect, property);
+            if (EditorGUI.EndChangeCheck())
+            {
+                EditorUtility.SetDirty(property.serializedObject.targetObject);
+            }
+            
             if (GUI.Button(new Rect(position.x + position.width - buttonWidth, position.y, buttonWidth, EditorGUIUtility.singleLineHeight), "Open Link"))
             {
                 if (!string.IsNullOrEmpty(property.stringValue))

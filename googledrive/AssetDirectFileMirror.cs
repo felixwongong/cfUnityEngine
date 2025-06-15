@@ -1,21 +1,23 @@
 #if CF_GOOGLE_DRIVE && UNITY_EDITOR
 
-using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
 using Google.Apis.Download;
 using Google.Apis.Drive.v3;
 using UnityEngine;
 using GoogleFile = Google.Apis.Drive.v3.Data.File;
 using SystemFile = System.IO.File;
+using MimeTypeStr = System.String;
 
 namespace cfUnityEngine.GoogleDrive
 {
     public class AssetDirectFileMirror : IFileMirrorHandler
     {
+        private static Dictionary<MimeTypeStr, XlsxFileHandler> _fileHandlers = new()
+        {
+            { "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", new XlsxFileHandler() },
+        };
+
         public async IAsyncEnumerable<RefreshStatus> RefreshFilesAsync(FilesResource filesResource, IReadOnlyList<GoogleFile> googleFiles,  IReadOnlyDictionary<string, MirrorItem> settingMap)
         {
             for (var i = 0; i < googleFiles.Count; i++)
@@ -26,26 +28,25 @@ namespace cfUnityEngine.GoogleDrive
 
                 var directory = CreateAssetDirectoryIfNotExists(mirror.assetFolderPath);
                 var localFileName = GetLocalFileName(googleFile, mirror);
-                var fullPath = Path.Combine(directory.FullName, localFileName);
 
-                using var fileStream = new FileStream(fullPath, FileMode.OpenOrCreate, FileAccess.Write);
+                await using var fileStream = new FileStream(Path.Combine(directory.FullName, localFileName), FileMode.OpenOrCreate, FileAccess.Write);
 
-                if (googleFile.isGoogleMimeType())
+                if (!_fileHandlers.TryGetValue(googleFile.MimeType, out var handler))
                 {
-                    var mimeType = googleFile.getExportMimeType();
-                    var request = filesResource.Export(googleFile.Id, mimeType);
-
-                    var result = await request.DownloadAsync(fileStream);
-                    LogDownloadProgress(result, googleFile);
-
-                    if (result != null && result.Status == DownloadStatus.Completed)
-                    {
-                        yield return new RefreshStatus(googleFile, result, (float)i / googleFiles.Count);
-                    }
-                }
-                else
+                    Debug.Log($"[AssetDirectFileMirror.RefreshFilesAsync] No handler found for mime type: {googleFile.MimeType}");
+                    continue;
+                }   
+                
+                var result = await handler.DownloadAsync(
+                    filesResource,
+                    fileStream,
+                    new FileHandler.DownloadRequest { fileId = googleFile.Id }
+                );
+                
+                LogDownloadProgress(result, googleFile);
+                if (result != null && result.Status == DownloadStatus.Completed)
                 {
-                    yield return new RefreshStatus(googleFile, null, (float)i / googleFiles.Count);
+                    yield return new RefreshStatus(googleFile, result, (float)i / googleFiles.Count);
                 }
             }
         }
@@ -59,18 +60,22 @@ namespace cfUnityEngine.GoogleDrive
 
                 var directory = CreateAssetDirectoryIfNotExists(mirror.assetFolderPath);
                 var localFileName = GetLocalFileName(googleFile, mirror);
-
-                var fileStream = new FileStream(Path.Combine(directory.FullName, localFileName), FileMode.OpenOrCreate,
-                    FileAccess.Write);
-
-                if (googleFile.isGoogleMimeType())
+                
+                using var fileStream = new FileStream(Path.Combine(directory.FullName, localFileName), FileMode.OpenOrCreate, FileAccess.Write);
+                
+                if (!_fileHandlers.TryGetValue(googleFile.MimeType, out var handler))
                 {
-                    var mimeType = googleFile.getExportMimeType();
-                    var request = filesResource.Export(googleFile.Id, mimeType);
-                    var status = request.DownloadWithStatus(fileStream);
-                    LogDownloadProgress(status, googleFile);
-                    fileStream.Dispose();
-                }
+                    Debug.Log($"[AssetDirectFileMirror.RefreshFiles] No handler found for mime type: {googleFile.MimeType}");
+                    continue;
+                }   
+
+                var result = handler.DownloadWithStatus(
+                    filesResource,
+                    fileStream,
+                    new FileHandler.DownloadRequest { fileId = googleFile.Id }
+                );
+
+                LogDownloadProgress(result, googleFile);
             }
         }
 
@@ -104,7 +109,7 @@ namespace cfUnityEngine.GoogleDrive
             var localAssetName = mirror.assetNameOverride;
             if (string.IsNullOrWhiteSpace(localAssetName))
             {
-                localAssetName = $"{googleFile.Name}.{googleFile.getExportExtensionType()}";
+                localAssetName = $"{googleFile.Name}";
             }
 
             return localAssetName;
