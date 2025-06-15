@@ -37,11 +37,11 @@ namespace cfUnityEngine.GoogleDrive
             }
         }
 
-        public MirrorItem[] items;
+        public SettingItem[] items;
 
-        private Dictionary<string, MirrorItem> _mirrorMap = new();
+        private Dictionary<string, SettingItem> _mirrorMap = new();
         public bool refreshOnEnterPlayMode = false;
-        public Dictionary<string, MirrorItem> mirrorMap => _mirrorMap;
+        public Dictionary<string, SettingItem> mirrorMap => _mirrorMap;
         
         [MethodButton]
         private void Refresh()
@@ -106,7 +106,7 @@ namespace cfUnityEngine.GoogleDrive
     }
 
     [Serializable]
-    public class MirrorItem
+    public class SettingItem
     {
         public string assetFolderPath;
         [UrlLink]

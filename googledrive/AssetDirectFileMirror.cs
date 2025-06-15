@@ -1,7 +1,10 @@
 #if CF_GOOGLE_DRIVE && UNITY_EDITOR
 
+using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
+using cfEngine;
 using Google.Apis.Download;
 using Google.Apis.Drive.v3;
 using UnityEngine;
@@ -18,16 +21,24 @@ namespace cfUnityEngine.GoogleDrive
             { "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", new XlsxFileHandler() },
         };
 
-        public async IAsyncEnumerable<RefreshStatus> RefreshFilesAsync(FilesResource filesResource, IReadOnlyList<GoogleFile> googleFiles,  IReadOnlyDictionary<string, MirrorItem> settingMap)
+        public async IAsyncEnumerable<RefreshStatus> RefreshFilesAsync(DriveService driveService, IReadOnlyList<GoogleFile> googleFiles, [NotNull] Func<GoogleFile, Res<SettingItem, Exception>> getSetting)
         {
+            var fileResource = driveService.Files;
             for (var i = 0; i < googleFiles.Count; i++)
             {
                 var googleFile = googleFiles[i];
-                if (!settingMap.TryGetValue(googleFile.Id, out var mirror))
+                var getFileSetting = getSetting(googleFile);
+                if (getFileSetting.TryGetError(out var error))
+                {
+                    Debug.LogError(error);
+                    continue;
+                }
+                
+                if (!getFileSetting.TryGetValue(out var setting))
                     continue;
 
-                var directory = CreateAssetDirectoryIfNotExists(mirror.assetFolderPath);
-                var localFileName = GetLocalFileName(googleFile, mirror);
+                var directory = CreateAssetDirectoryIfNotExists(setting.assetFolderPath);
+                var localFileName = GetLocalFileName(googleFile, setting);
 
                 await using var fileStream = new FileStream(Path.Combine(directory.FullName, localFileName), FileMode.OpenOrCreate, FileAccess.Write);
 
@@ -38,7 +49,7 @@ namespace cfUnityEngine.GoogleDrive
                 }   
                 
                 var result = await handler.DownloadAsync(
-                    filesResource,
+                    fileResource,
                     fileStream,
                     new FileHandler.DownloadRequest { fileId = googleFile.Id }
                 );
@@ -51,15 +62,22 @@ namespace cfUnityEngine.GoogleDrive
             }
         }
 
-        public void RefreshFiles(FilesResource filesResource, IEnumerable<GoogleFile> googleFiles, IReadOnlyDictionary<string, MirrorItem> settingMap)
+        public void RefreshFiles(FilesResource filesResource, IEnumerable<GoogleFile> googleFiles, [NotNull] Func<GoogleFile, Res<SettingItem, Exception>> getSetting)
         {
             foreach (var googleFile in googleFiles)
             {
-                if (!settingMap.TryGetValue(googleFile.Id, out var mirror))
+                var getFileSetting = getSetting(googleFile);
+                if (getFileSetting.TryGetError(out var err))
+                {
+                    Debug.LogError(err);
+                    continue;
+                }
+
+                if (!getFileSetting.TryGetValue(out var setting))
                     continue;
 
-                var directory = CreateAssetDirectoryIfNotExists(mirror.assetFolderPath);
-                var localFileName = GetLocalFileName(googleFile, mirror);
+                var directory = CreateAssetDirectoryIfNotExists(setting.assetFolderPath);
+                var localFileName = GetLocalFileName(googleFile, setting);
                 
                 using var fileStream = new FileStream(Path.Combine(directory.FullName, localFileName), FileMode.OpenOrCreate, FileAccess.Write);
                 
@@ -104,9 +122,9 @@ namespace cfUnityEngine.GoogleDrive
             }
         }
 
-        private string GetLocalFileName(GoogleFile googleFile, MirrorItem mirror)
+        private string GetLocalFileName(GoogleFile googleFile, SettingItem setting)
         {
-            var localAssetName = mirror.assetNameOverride;
+            var localAssetName = setting.assetNameOverride;
             if (string.IsNullOrWhiteSpace(localAssetName))
             {
                 localAssetName = $"{googleFile.Name}";

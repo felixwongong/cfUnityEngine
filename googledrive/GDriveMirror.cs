@@ -1,14 +1,17 @@
 #if CF_GOOGLE_DRIVE
+using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading;
+using cfEngine;
 using cfEngine.Logging;
 using Google.Apis.Auth.OAuth2;
 using Google.Apis.Download;
 using Google.Apis.Drive.v3;
 using Google.Apis.Drive.v3.Data;
 using Google.Apis.Services;
-using JetBrains.Annotations;
+using GoogleFile = Google.Apis.Drive.v3.Data.File;
 
 namespace cfUnityEngine.GoogleDrive
 {
@@ -28,8 +31,8 @@ namespace cfUnityEngine.GoogleDrive
     
     public interface IFileMirrorHandler
     {
-        IAsyncEnumerable<RefreshStatus> RefreshFilesAsync(FilesResource filesResource, IReadOnlyList<File> googleFiles, [NotNull] IReadOnlyDictionary<string, MirrorItem> settingMap);
-        void RefreshFiles(FilesResource filesResource, IEnumerable<File> googleFiles, [NotNull] IReadOnlyDictionary<string, MirrorItem> settingMap);
+        IAsyncEnumerable<RefreshStatus> RefreshFilesAsync(DriveService driveService, IReadOnlyList<GoogleFile> googleFiles, [NotNull] Func<GoogleFile, Res<SettingItem, Exception>> getSetting);
+        void RefreshFiles(FilesResource filesResource, IEnumerable<GoogleFile> googleFiles, [NotNull] Func<GoogleFile, Res<SettingItem, Exception>> getSetting);
         void ClearAssetDirectories(IEnumerable<string> assetFolderPaths);
     }
 
@@ -46,7 +49,7 @@ namespace cfUnityEngine.GoogleDrive
             _logger = logger;
         }
 
-        private DriveService CreateFileService()
+        private DriveService CreateDriveService()
         {
             var setting = GDriveMirrorSetting.GetSetting();
             var credentialJson = setting.serviceAccountCredentialJson;
@@ -87,16 +90,15 @@ namespace cfUnityEngine.GoogleDrive
 
             _refreshCancelToken = new CancellationTokenSource();
             
-            var service = CreateFileService();
-            if(service == null) yield break;
+            var driveService = CreateDriveService();
+            if(driveService == null) yield break;
 
-            var request = GetServiceRequests(service);
+            var request = GetServiceRequests(driveService);
             if(request == null) yield break;
             
             var response = await request.ExecuteAsync(_refreshCancelToken.Token);
 
-            var setting = GDriveMirrorSetting.GetSetting();
-            await foreach (var status in _mirrorHandler.RefreshFilesAsync(service.Files, response.Files.ToArray(), setting.mirrorMap))
+            await foreach (var status in _mirrorHandler.RefreshFilesAsync(driveService, response.Files.ToArray(), GetSetting))
             {
                 yield return status;
             }
@@ -110,7 +112,7 @@ namespace cfUnityEngine.GoogleDrive
         {
             _logger.LogInfo("[GDriveMirror.Refresh] start refresh files");
             
-            var service = CreateFileService();
+            var service = CreateDriveService();
             if(service == null) return;
 
             var request = GetServiceRequests(service);
@@ -118,9 +120,22 @@ namespace cfUnityEngine.GoogleDrive
 
             var response = request.Execute();
             
-            var setting = GDriveMirrorSetting.GetSetting();
-            _mirrorHandler.RefreshFiles(service.Files, response.Files, setting.mirrorMap);
+            _mirrorHandler.RefreshFiles(service.Files, response.Files, GetSetting);
             _logger.LogInfo("[GDriveMirror.Refresh] refresh files succeed");
+        }
+
+        private Res<SettingItem, Exception> GetSetting(File file)
+        {
+            var filesSetting = GDriveMirrorSetting.GetSetting(); 
+            if(filesSetting == null || filesSetting.mirrorMap == null)
+                return Res<SettingItem, Exception>.Err(new Exception("GDriveMirrorSetting is not initialized."));
+
+            if (!filesSetting.mirrorMap.TryGetValue(file.Id, out var setting))
+            {
+                return Res<SettingItem, Exception>.Ok(null);
+            }
+            
+            return Res<SettingItem, Exception>.Ok(setting);
         }
     }
 }
