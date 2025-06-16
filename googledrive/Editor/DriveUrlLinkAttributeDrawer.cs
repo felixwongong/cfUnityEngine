@@ -14,21 +14,17 @@ namespace cfUnityEngine.GoogleDrive
             var totalLine = 0;
 
             GUI.enabled = false;
-            property.isExpanded = EditorGUI.Foldout(GetShiftedLineRect(position, totalLine), property.isExpanded, "UrlInfo", true);
-            totalLine++;
+            property.isExpanded = EditorGUI.Foldout(GetShiftedLineRect(position, totalLine++), property.isExpanded, "UrlInfo", true);
             if (property.isExpanded)
             {
                 var getUrlInfo = GoogleDriveUtil.ParseUrl(url);
                 if (getUrlInfo.TryGetError(out var error))
                 {
-                    EditorGUI.LabelField(GetShiftedLineRect(position, totalLine), $"Error: {error.Message}");
-                    totalLine++;
+                    EditorGUI.LabelField(GetShiftedLineRect(position, totalLine++), $"Error: {error.Message}");
                 } else if (getUrlInfo.TryGetValue(out var urlInfo))
                 {
-                    EditorGUI.EnumPopup(GetShiftedLineRect(position, totalLine), "File Type", urlInfo.fileType);
-                    totalLine++;
-                    EditorGUI.TextField(GetShiftedLineRect(position, totalLine), "File ID", urlInfo.fileId);
-                    totalLine++;
+                    EditorGUI.EnumPopup(GetShiftedLineRect(position, totalLine++), "File Type", urlInfo.fileType);
+                    EditorGUI.TextField(GetShiftedLineRect(position, totalLine++), "File ID", urlInfo.fileId);
                 }
             }
             GUI.enabled = true;
