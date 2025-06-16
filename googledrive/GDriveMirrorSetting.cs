@@ -86,7 +86,7 @@ namespace cfUnityEngine.GoogleDrive
             foreach (var item in items)
             {
                 if (string.IsNullOrEmpty(item.googleDriveLink)) continue;
-                var getUrlInfo = GoogleDriveUtil.ExtractFileId(item.googleDriveLink);
+                var getUrlInfo = GoogleDriveUtil.ParseUrl(item.googleDriveLink);
                 if (getUrlInfo.TryGetError(out var error))
                 {
                     Debug.LogError(error);
@@ -109,7 +109,7 @@ namespace cfUnityEngine.GoogleDrive
     public class SettingItem
     {
         public string assetFolderPath;
-        [UrlLink]
+        [DriveUrlLink]
         public string googleDriveLink;
         public string assetNameOverride;
     }

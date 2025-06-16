@@ -30,7 +30,7 @@ namespace cfUnityEngine.GoogleDrive
             return $"https://docs.google.com/spreadsheets/d/{driveFileId}";
         }
         
-        public static Res<UrlInfo, Exception> ExtractFileId(string driveLink)
+        public static Res<UrlInfo, Exception> ParseUrl(string driveLink)
         {
             if (string.IsNullOrEmpty(driveLink))
                 return Res<UrlInfo, Exception>.Err(new Exception("Drive link cannot be null or empty."));

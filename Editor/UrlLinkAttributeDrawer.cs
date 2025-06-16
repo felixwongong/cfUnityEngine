@@ -15,6 +15,7 @@ namespace cfUnityEngine.Editor
             if (EditorGUI.EndChangeCheck())
             {
                 EditorUtility.SetDirty(property.serializedObject.targetObject);
+                OnGUI_OnUrlChange(property.stringValue, position, property, label);
             }
             
             if (GUI.Button(new Rect(position.x + position.width - buttonWidth, position.y, buttonWidth, EditorGUIUtility.singleLineHeight), "Open Link"))
@@ -28,6 +29,10 @@ namespace cfUnityEngine.Editor
                     Debug.LogWarning("UrlLinkAttributeDrawer: Property value is empty, cannot open link.");
                 }
             }
+        }
+
+        protected virtual void OnGUI_OnUrlChange(string url, Rect position, SerializedProperty property, GUIContent label)
+        {
         }
     }
 }
