@@ -6,6 +6,7 @@ namespace cfUnityEngine.GoogleDrive
     [CustomPropertyDrawer(typeof(GoogleDriveIdAttribute), true)]
     public class GoogleDriveIdAttributeDrawer : PropertyDrawer
     {
+        /*
         private string _driveLink = string.Empty; 
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
@@ -41,5 +42,6 @@ namespace cfUnityEngine.GoogleDrive
         {
             return 2 * EditorGUIUtility.singleLineHeight + EditorGUIUtility.standardVerticalSpacing;
         }
+        */
     }
 }

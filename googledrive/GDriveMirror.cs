@@ -31,8 +31,8 @@ namespace cfUnityEngine.GoogleDrive
     
     public interface IFileMirrorHandler
     {
-        IAsyncEnumerable<RefreshStatus> RefreshFilesAsync(DriveService driveService, IReadOnlyList<GoogleFile> googleFiles, [NotNull] Func<GoogleFile, Res<SettingItem, Exception>> getSetting);
-        void RefreshFiles(FilesResource filesResource, IEnumerable<GoogleFile> googleFiles, [NotNull] Func<GoogleFile, Res<SettingItem, Exception>> getSetting);
+        IAsyncEnumerable<RefreshStatus> RefreshFilesAsync(DriveService driveService, IReadOnlyList<GoogleFile> googleFiles, [NotNull] Func<GoogleFile, Res<Optional<SettingItem>, Exception>> getSetting);
+        void RefreshFiles(FilesResource filesResource, IEnumerable<GoogleFile> googleFiles, [NotNull] Func<GoogleFile, Res<Optional<SettingItem>, Exception>> getSetting);
         void ClearAssetDirectories(IEnumerable<string> assetFolderPaths);
     }
 
@@ -124,18 +124,18 @@ namespace cfUnityEngine.GoogleDrive
             _logger.LogInfo("[GDriveMirror.Refresh] refresh files succeed");
         }
 
-        private Res<SettingItem, Exception> GetSetting(File file)
+        private Res<Optional<SettingItem>, Exception> GetSetting(File file)
         {
             var filesSetting = GDriveMirrorSetting.GetSetting(); 
             if(filesSetting == null || filesSetting.mirrorMap == null)
-                return Res<SettingItem, Exception>.Err(new Exception("GDriveMirrorSetting is not initialized."));
+                return Res.Err<Optional<SettingItem>>(new Exception("GDriveMirrorSetting is not initialized."));
 
             if (!filesSetting.mirrorMap.TryGetValue(file.Id, out var setting))
             {
-                return Res<SettingItem, Exception>.Ok(null);
+                return Res.Ok(Optional.None<SettingItem>());
             }
             
-            return Res<SettingItem, Exception>.Ok(setting);
+            return Res.Ok(Optional.Some(setting));
         }
     }
 }

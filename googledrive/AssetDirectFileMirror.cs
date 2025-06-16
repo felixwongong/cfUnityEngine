@@ -21,7 +21,9 @@ namespace cfUnityEngine.GoogleDrive
             { "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", new XlsxFileHandler() },
         };
 
-        public async IAsyncEnumerable<RefreshStatus> RefreshFilesAsync(DriveService driveService, IReadOnlyList<GoogleFile> googleFiles, [NotNull] Func<GoogleFile, Res<SettingItem, Exception>> getSetting)
+        public async IAsyncEnumerable<RefreshStatus> RefreshFilesAsync(DriveService driveService,
+            IReadOnlyList<GoogleFile> googleFiles,
+            [NotNull] Func<GoogleFile, Res<Optional<SettingItem>, Exception>> getSetting)
         {
             var fileResource = driveService.Files;
             for (var i = 0; i < googleFiles.Count; i++)
@@ -34,7 +36,7 @@ namespace cfUnityEngine.GoogleDrive
                     continue;
                 }
                 
-                if (!getFileSetting.TryGetValue(out var setting))
+                if (!getFileSetting.TryGetValue(out var optionalSetting) || !optionalSetting.TryGetValue(out var setting))
                     continue;
 
                 var directory = CreateAssetDirectoryIfNotExists(setting.assetFolderPath);
@@ -62,7 +64,8 @@ namespace cfUnityEngine.GoogleDrive
             }
         }
 
-        public void RefreshFiles(FilesResource filesResource, IEnumerable<GoogleFile> googleFiles, [NotNull] Func<GoogleFile, Res<SettingItem, Exception>> getSetting)
+        public void RefreshFiles(FilesResource filesResource, IEnumerable<GoogleFile> googleFiles,
+            [NotNull] Func<GoogleFile, Res<Optional<SettingItem>, Exception>> getSetting)
         {
             foreach (var googleFile in googleFiles)
             {
@@ -73,7 +76,7 @@ namespace cfUnityEngine.GoogleDrive
                     continue;
                 }
 
-                if (!getFileSetting.TryGetValue(out var setting))
+                if (!getFileSetting.TryGetValue(out var optionalSetting) || !optionalSetting.TryGetValue(out var setting))
                     continue;
 
                 var directory = CreateAssetDirectoryIfNotExists(setting.assetFolderPath);
