@@ -61,7 +61,7 @@ namespace cfUnityEngine.GoogleDrive
             });
         }
         
-        [MethodButton]
+        //[MethodButton]
         private void ClearAllAndRefresh()
         {
             Debug.Log("[GDriveMirrorSetting.ClearAllAndRefresh] clear all and refresh started");
