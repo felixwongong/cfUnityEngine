@@ -2,6 +2,7 @@ using System.IO;
 using System.Threading.Tasks;
 using Google.Apis.Download;
 using Google.Apis.Drive.v3;
+using GoogleFile = Google.Apis.Drive.v3.Data.File;
 
 namespace cfUnityEngine.GoogleDrive
 {
@@ -9,27 +10,12 @@ namespace cfUnityEngine.GoogleDrive
     {
         public struct DownloadRequest
         {
-            public string fileId;
+            public string googleFileId;
+            public DirectoryInfo rootDirectoryInfo;
+            public string localName;
         }
         
-        public IDownloadProgress DownloadWithStatus(FilesResource filesResource, Stream stream, in DownloadRequest downloadRequest);
-        public Task<IDownloadProgress> DownloadAsync(FilesResource filesResource, Stream stream, in DownloadRequest downloadRequest);
-    }
-
-    public struct XlsxFileHandler : FileHandler
-    {
-        public IDownloadProgress DownloadWithStatus(FilesResource filesResource, Stream stream, in FileHandler.DownloadRequest downloadRequest)
-        {
-            var fileId = downloadRequest.fileId;
-            var request = filesResource.Get(fileId);
-            return request.DownloadWithStatus(stream);
-        }
-
-        public Task<IDownloadProgress> DownloadAsync(FilesResource filesResource, Stream stream, in FileHandler.DownloadRequest downloadRequest)
-        {
-            var fileId = downloadRequest.fileId;
-            var request = filesResource.Get(fileId);
-            return request.DownloadAsync(stream);
-        }
+        public IDownloadProgress DownloadWithStatus(FilesResource filesResource, in DownloadRequest downloadRequest);
+        public Task<IDownloadProgress> DownloadAsync(FilesResource filesResource, DownloadRequest downloadRequest);
     }
 }

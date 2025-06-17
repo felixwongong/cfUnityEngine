@@ -68,10 +68,11 @@ namespace cfUnityEngine.GoogleDrive
             });
         }
         
-        private FilesResource.ListRequest GetServiceRequests(DriveService service)
+        private FilesResource.ListRequest CreateFileRequest(DriveService service)
         {
+            const string FIELDS = "files(id, name, mimeType, modifiedTime, size)"; 
             var request = service.Files.List();
-            request.Fields = "files(id, name, mimeType, createdTime, modifiedTime, size, owners)";
+            request.Fields = FIELDS;
             return request;
         }
 
@@ -93,7 +94,7 @@ namespace cfUnityEngine.GoogleDrive
             var driveService = CreateDriveService();
             if(driveService == null) yield break;
 
-            var request = GetServiceRequests(driveService);
+            var request = CreateFileRequest(driveService);
             if(request == null) yield break;
             
             var response = await request.ExecuteAsync(_refreshCancelToken.Token);
@@ -115,7 +116,7 @@ namespace cfUnityEngine.GoogleDrive
             var service = CreateDriveService();
             if(service == null) return;
 
-            var request = GetServiceRequests(service);
+            var request = CreateFileRequest(service);
             if(request == null) return;
 
             var response = request.Execute();

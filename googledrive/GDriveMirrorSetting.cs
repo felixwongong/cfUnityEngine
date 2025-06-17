@@ -108,10 +108,10 @@ namespace cfUnityEngine.GoogleDrive
     [Serializable]
     public class SettingItem
     {
+        public string assetNameOverride;
         public string assetFolderPath;
         [DriveUrlLink]
         public string googleDriveLink;
-        public string assetNameOverride;
     }
 }
 

@@ -5,23 +5,19 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using cfEngine;
+using cfUnityEngine.Util;
 using Google.Apis.Download;
 using Google.Apis.Drive.v3;
 using UnityEngine;
 using GoogleFile = Google.Apis.Drive.v3.Data.File;
 using SystemFile = System.IO.File;
-using MimeTypeStr = System.String;
 
 namespace cfUnityEngine.GoogleDrive
 {
     public class AssetDirectFileMirror : IFileMirrorHandler
     {
-        private static Dictionary<MimeTypeStr, XlsxFileHandler> _fileHandlers = new()
-        {
-            { "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", new XlsxFileHandler() },
-        };
-
-        public async IAsyncEnumerable<RefreshStatus> RefreshFilesAsync(DriveService driveService,
+        public async IAsyncEnumerable<RefreshStatus> RefreshFilesAsync(
+            DriveService driveService,
             IReadOnlyList<GoogleFile> googleFiles,
             [NotNull] Func<GoogleFile, Res<Optional<SettingItem>, Exception>> getSetting)
         {
@@ -39,21 +35,23 @@ namespace cfUnityEngine.GoogleDrive
                 if (!getFileSetting.TryGetValue(out var optionalSetting) || !optionalSetting.TryGetValue(out var setting))
                     continue;
 
-                var directory = CreateAssetDirectoryIfNotExists(setting.assetFolderPath);
-                var localFileName = GetLocalFileName(googleFile, setting);
-
-                await using var fileStream = new FileStream(Path.Combine(directory.FullName, localFileName), FileMode.OpenOrCreate, FileAccess.Write);
-
-                if (!_fileHandlers.TryGetValue(googleFile.MimeType, out var handler))
+                if (!GoogleDriveUtil.MimeFileHandlers.TryGetValue(googleFile.MimeType, out var handler))
                 {
                     Debug.Log($"[AssetDirectFileMirror.RefreshFilesAsync] No handler found for mime type: {googleFile.MimeType}");
                     continue;
                 }   
                 
+                var directory = DirectoryUtil.CreateAssetDirectoryIfNotExists(setting.assetFolderPath);
+                var localFileName = GetLocalFileName(googleFile, setting);
+                
                 var result = await handler.DownloadAsync(
                     fileResource,
-                    fileStream,
-                    new FileHandler.DownloadRequest { fileId = googleFile.Id }
+                    new FileHandler.DownloadRequest
+                    {
+                        googleFileId = googleFile.Id,
+                        rootDirectoryInfo = directory,
+                        localName = localFileName
+                    }
                 );
                 
                 LogDownloadProgress(result, googleFile);
@@ -64,8 +62,11 @@ namespace cfUnityEngine.GoogleDrive
             }
         }
 
-        public void RefreshFiles(FilesResource filesResource, IEnumerable<GoogleFile> googleFiles,
-            [NotNull] Func<GoogleFile, Res<Optional<SettingItem>, Exception>> getSetting)
+        public void RefreshFiles(
+            FilesResource filesResource,
+            IEnumerable<GoogleFile> googleFiles,
+            [NotNull] Func<GoogleFile, Res<Optional<SettingItem>, Exception>> getSetting
+            )
         {
             foreach (var googleFile in googleFiles)
             {
@@ -79,37 +80,27 @@ namespace cfUnityEngine.GoogleDrive
                 if (!getFileSetting.TryGetValue(out var optionalSetting) || !optionalSetting.TryGetValue(out var setting))
                     continue;
 
-                var directory = CreateAssetDirectoryIfNotExists(setting.assetFolderPath);
-                var localFileName = GetLocalFileName(googleFile, setting);
-                
-                using var fileStream = new FileStream(Path.Combine(directory.FullName, localFileName), FileMode.OpenOrCreate, FileAccess.Write);
-                
-                if (!_fileHandlers.TryGetValue(googleFile.MimeType, out var handler))
+                if (!GoogleDriveUtil.MimeFileHandlers.TryGetValue(googleFile.MimeType, out var handler))
                 {
                     Debug.Log($"[AssetDirectFileMirror.RefreshFiles] No handler found for mime type: {googleFile.MimeType}");
                     continue;
                 }   
 
+                var directory = DirectoryUtil.CreateAssetDirectoryIfNotExists(setting.assetFolderPath);
+                var localFileName = GetLocalFileName(googleFile, setting);
+                
                 var result = handler.DownloadWithStatus(
                     filesResource,
-                    fileStream,
-                    new FileHandler.DownloadRequest { fileId = googleFile.Id }
+                    new FileHandler.DownloadRequest
+                    {
+                        googleFileId = googleFile.Id,
+                        rootDirectoryInfo = directory,
+                        localName = localFileName
+                    }
                 );
 
                 LogDownloadProgress(result, googleFile);
             }
-        }
-
-        private DirectoryInfo CreateAssetDirectoryIfNotExists(string assetFolderPath)
-        {
-            var absolutePath = Path.Combine(Application.dataPath, assetFolderPath);
-            var directoryInfo = new DirectoryInfo(absolutePath);
-            if (!directoryInfo.Exists)
-            {
-                directoryInfo.Create();
-            }
-
-            return directoryInfo;
         }
 
         public void ClearAssetDirectories(IEnumerable<string> assetFolderPaths)

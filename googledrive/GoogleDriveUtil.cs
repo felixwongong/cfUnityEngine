@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using cfEngine;
 using cfEngine.Util;
 
@@ -25,6 +26,13 @@ namespace cfUnityEngine.GoogleDrive
     
     public static class GoogleDriveUtil
     {
+        public static IReadOnlyDictionary<string, FileHandler> MimeFileHandlers = new Dictionary<string, FileHandler>()
+        {
+            { "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", new XlsxFileHandler() },
+            { "application/vnd.google-apps.folder", new FolderMimeHandler() },
+        };
+
+
         public static string FormLink(string driveFileId)
         {
             return $"https://docs.google.com/spreadsheets/d/{driveFileId}";
