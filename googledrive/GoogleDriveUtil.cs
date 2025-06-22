@@ -28,7 +28,7 @@ namespace cfUnityEngine.GoogleDrive
     {
         public static IReadOnlyDictionary<string, FileHandler> MimeFileHandlers = new Dictionary<string, FileHandler>()
         {
-            { "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", new XlsxFileHandler() },
+            { "application/vnd.google-apps.spreadsheet", new SheetFileHandler() },
             { "application/vnd.google-apps.folder", new FolderMimeHandler() },
         };
 

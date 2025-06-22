@@ -23,8 +23,10 @@ namespace cfUnityEngine.GoogleDrive
                     EditorGUI.LabelField(GetShiftedLineRect(position, totalLine++), $"Error: {error.Message}");
                 } else if (getUrlInfo.TryGetValue(out var urlInfo))
                 {
+                    EditorGUI.indentLevel++;
                     EditorGUI.EnumPopup(GetShiftedLineRect(position, totalLine++), "File Type", urlInfo.fileType);
                     EditorGUI.TextField(GetShiftedLineRect(position, totalLine++), "File ID", urlInfo.fileId);
+                    EditorGUI.indentLevel--;
                 }
             }
             GUI.enabled = true;

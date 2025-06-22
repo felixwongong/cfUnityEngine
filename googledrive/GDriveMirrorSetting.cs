@@ -36,13 +36,21 @@ namespace cfUnityEngine.GoogleDrive
                 return _serviceAccountCredentialJson;
             }
         }
+        [ReadOnly]
+        public string changeChecksumToken = string.Empty;
 
         public SettingItem[] items;
 
-        private Dictionary<string, SettingItem> _mirrorMap = new();
+        private Dictionary<string, SettingItem> _settingMap = new();
         public bool refreshOnEnterPlayMode = false;
-        public Dictionary<string, SettingItem> mirrorMap => _mirrorMap;
-        
+        public Dictionary<string, SettingItem> settingMap => _settingMap;
+
+        [MethodButton]
+        private void Refresh_Test()
+        {
+            GDriveMirror.instance.Refresh();
+        }
+
         [MethodButton]
         private void Refresh()
         {
@@ -60,9 +68,9 @@ namespace cfUnityEngine.GoogleDrive
                 }
             });
         }
-        
-        //[MethodButton]
-        private void ClearAllAndRefresh()
+
+        [MethodButton]
+        private void ForceRefreshAll()
         {
             Debug.Log("[GDriveMirrorSetting.ClearAllAndRefresh] clear all and refresh started");
             GDriveMirror.instance.ClearAllAndRefreshWithProgressBar().ContinueWith(task =>
@@ -81,7 +89,7 @@ namespace cfUnityEngine.GoogleDrive
 
         private void OnValidate()
         {
-            _mirrorMap.Clear();
+            _settingMap.Clear();
             
             foreach (var item in items)
             {
@@ -96,9 +104,9 @@ namespace cfUnityEngine.GoogleDrive
                 if (!getUrlInfo.TryGetValue(out var urlInfo))
                     continue;
                 
-                if(!_mirrorMap.TryAdd(urlInfo.fileId, item))
+                if(!_settingMap.TryAdd(urlInfo.fileId, item))
                 {
-                    var existing = _mirrorMap[item.googleDriveLink];
+                    var existing = _settingMap[item.googleDriveLink];
                     Debug.LogError($"Duplicate googleDriveId ({item.googleDriveLink}) found for ({existing.assetFolderPath}) and ({item.assetFolderPath}), ");
                 }
             }
@@ -112,6 +120,15 @@ namespace cfUnityEngine.GoogleDrive
         public string assetFolderPath;
         [DriveUrlLink]
         public string googleDriveLink;
+        [ReadOnly]
+        public string googleFileName;
+        [SerializeField,HideInInspector]
+        public List<string> googleFiles;
+
+        public void ClearCache()
+        {
+            googleFileName = string.Empty;
+        }
     }
 }
 

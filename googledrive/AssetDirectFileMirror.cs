@@ -1,10 +1,7 @@
 #if CF_GOOGLE_DRIVE && UNITY_EDITOR
 
-using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.IO;
-using cfEngine;
 using cfUnityEngine.Util;
 using Google.Apis.Download;
 using Google.Apis.Drive.v3;
@@ -16,12 +13,12 @@ namespace cfUnityEngine.GoogleDrive
 {
     public class AssetDirectFileMirror : IFileMirrorHandler
     {
-        public async IAsyncEnumerable<RefreshStatus> RefreshFilesAsync(
-            DriveService driveService,
-            IReadOnlyList<GoogleFile> googleFiles,
-            [NotNull] Func<GoogleFile, Res<Optional<SettingItem>, Exception>> getSetting)
+        public async IAsyncEnumerable<RefreshStatus> RefreshFilesAsync(DriveService driveService, RefreshRequest request)
         {
+            var googleFiles = request.googleFiles;
+            var getSetting = request.getSetting;
             var fileResource = driveService.Files;
+            var changeHandler = request.changeHandler;
             for (var i = 0; i < googleFiles.Count; i++)
             {
                 var googleFile = googleFiles[i];
@@ -34,7 +31,7 @@ namespace cfUnityEngine.GoogleDrive
                 
                 if (!getFileSetting.TryGetValue(out var optionalSetting) || !optionalSetting.TryGetValue(out var setting))
                     continue;
-
+                
                 if (!GoogleDriveUtil.MimeFileHandlers.TryGetValue(googleFile.MimeType, out var handler))
                 {
                     Debug.Log($"[AssetDirectFileMirror.RefreshFilesAsync] No handler found for mime type: {googleFile.MimeType}");
@@ -50,7 +47,8 @@ namespace cfUnityEngine.GoogleDrive
                     {
                         googleFileId = googleFile.Id,
                         rootDirectoryInfo = directory,
-                        localName = localFileName
+                        localName = localFileName,
+                        changeHandler = changeHandler
                     }
                 );
                 
@@ -59,15 +57,16 @@ namespace cfUnityEngine.GoogleDrive
                 {
                     yield return new RefreshStatus(googleFile, result, (float)i / googleFiles.Count);
                 }
+                OnDownloadEnd(result, googleFile, setting);
             }
         }
 
-        public void RefreshFiles(
-            FilesResource filesResource,
-            IEnumerable<GoogleFile> googleFiles,
-            [NotNull] Func<GoogleFile, Res<Optional<SettingItem>, Exception>> getSetting
-            )
+        public void RefreshFiles(DriveService driveService, in RefreshRequest request)
         {
+            var filesResource = driveService.Files;
+            var googleFiles = request.googleFiles;
+            var getSetting = request.getSetting;
+            var changeHandler = request.changeHandler;
             foreach (var googleFile in googleFiles)
             {
                 var getFileSetting = getSetting(googleFile);
@@ -84,7 +83,7 @@ namespace cfUnityEngine.GoogleDrive
                 {
                     Debug.Log($"[AssetDirectFileMirror.RefreshFiles] No handler found for mime type: {googleFile.MimeType}");
                     continue;
-                }   
+                }
 
                 var directory = DirectoryUtil.CreateAssetDirectoryIfNotExists(setting.assetFolderPath);
                 var localFileName = GetLocalFileName(googleFile, setting);
@@ -95,11 +94,21 @@ namespace cfUnityEngine.GoogleDrive
                     {
                         googleFileId = googleFile.Id,
                         rootDirectoryInfo = directory,
-                        localName = localFileName
+                        localName = localFileName,
+                        changeHandler = changeHandler
                     }
                 );
 
                 LogDownloadProgress(result, googleFile);
+                OnDownloadEnd(result, googleFile, setting);
+            }
+        }
+
+        private void OnDownloadEnd(IDownloadProgress progress, GoogleFile googleFile, SettingItem setting)
+        {
+            if (progress is { Status: DownloadStatus.Completed })
+            {
+                setting.googleFileName = googleFile.Name;
             }
         }
 

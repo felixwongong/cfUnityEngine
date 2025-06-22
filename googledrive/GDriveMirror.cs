@@ -1,17 +1,16 @@
 #if CF_GOOGLE_DRIVE
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
-using System.Linq;
 using System.Threading;
 using cfEngine;
-using cfEngine.Logging;
 using Google.Apis.Auth.OAuth2;
 using Google.Apis.Download;
 using Google.Apis.Drive.v3;
 using Google.Apis.Drive.v3.Data;
 using Google.Apis.Services;
+using UnityEngine;
 using GoogleFile = Google.Apis.Drive.v3.Data.File;
+using ILogger = cfEngine.Logging.ILogger;
 
 namespace cfUnityEngine.GoogleDrive
 {
@@ -28,11 +27,23 @@ namespace cfUnityEngine.GoogleDrive
             this.progress = progress;
         }
     }
+
+    public struct RefreshRequest
+    {
+        public IList<GoogleFile> googleFiles;
+        public Func<GoogleFile, Res<Optional<SettingItem>, Exception>> getSetting;
+        public IChangeHandler changeHandler;
+    }
+
+    public struct RefreshResult
+    {
+        public string newChangeChecksumToken;
+    }
     
     public interface IFileMirrorHandler
     {
-        IAsyncEnumerable<RefreshStatus> RefreshFilesAsync(DriveService driveService, IReadOnlyList<GoogleFile> googleFiles, [NotNull] Func<GoogleFile, Res<Optional<SettingItem>, Exception>> getSetting);
-        void RefreshFiles(FilesResource filesResource, IEnumerable<GoogleFile> googleFiles, [NotNull] Func<GoogleFile, Res<Optional<SettingItem>, Exception>> getSetting);
+        IAsyncEnumerable<RefreshStatus> RefreshFilesAsync(DriveService driveService, RefreshRequest request);
+        void RefreshFiles(DriveService driveService, in RefreshRequest request);
         void ClearAssetDirectories(IEnumerable<string> assetFolderPaths);
     }
 
@@ -70,7 +81,7 @@ namespace cfUnityEngine.GoogleDrive
         
         private FilesResource.ListRequest CreateFileRequest(DriveService service)
         {
-            const string FIELDS = "files(id, name, mimeType, modifiedTime, size)"; 
+            const string FIELDS = "files(id, name, mimeType, modifiedTime, md5Checksum, size)"; 
             var request = service.Files.List();
             request.Fields = FIELDS;
             return request;
@@ -79,9 +90,11 @@ namespace cfUnityEngine.GoogleDrive
         public IAsyncEnumerable<RefreshStatus> ClearAllAndRefreshAsync()
         {
             var setting = GDriveMirrorSetting.GetSetting();
-            var folderPaths = setting.mirrorMap.Values.Select(mirrorItem => mirrorItem.assetFolderPath).ToArray();
-            _mirrorHandler.ClearAssetDirectories(folderPaths);
-            _logger.LogInfo($"[GDriveMirror.ClearAllAndRefreshAsync] cleared all asset directories, Folders: {string.Join(',', folderPaths)}");
+            setting.changeChecksumToken = string.Empty;
+            foreach (var item in setting.settingMap.Values)
+            {
+                item.googleFileName = string.Empty;
+            }
             return RefreshAsync();
         }
         
@@ -96,14 +109,23 @@ namespace cfUnityEngine.GoogleDrive
 
             var request = CreateFileRequest(driveService);
             if(request == null) yield break;
-            
-            var response = await request.ExecuteAsync(_refreshCancelToken.Token);
 
-            await foreach (var status in _mirrorHandler.RefreshFilesAsync(driveService, response.Files.ToArray(), GetSetting))
+            var changeHandler = new ChangeHandler();
+            var newChangeChecksumToken = await changeHandler.LoadChangesAsync(driveService, GDriveMirrorSetting.GetSetting().changeChecksumToken);
+            var response = await request.ExecuteAsync(_refreshCancelToken.Token);
+            var refreshRequest = new RefreshRequest()
+            {
+                googleFiles = response.Files,
+                getSetting = GetSetting,
+                changeHandler = changeHandler
+            };
+
+            await foreach (var status in _mirrorHandler.RefreshFilesAsync(driveService, refreshRequest))
             {
                 yield return status;
             }
             
+            GDriveMirrorSetting.GetSetting().changeChecksumToken = newChangeChecksumToken;
             _logger.LogInfo("[GDriveMirror.RefreshAsync] refresh files succeed");
 
             _refreshCancelToken = null;
@@ -113,25 +135,43 @@ namespace cfUnityEngine.GoogleDrive
         {
             _logger.LogInfo("[GDriveMirror.Refresh] start refresh files");
             
-            var service = CreateDriveService();
-            if(service == null) return;
+            var driveService = CreateDriveService();
+            if(driveService == null) return;
 
-            var request = CreateFileRequest(service);
+            var request = CreateFileRequest(driveService);
             if(request == null) return;
 
+            var changeHandler = new ChangeHandler();
+            var newChecksumToken = changeHandler.LoadChanges(driveService, GDriveMirrorSetting.GetSetting().changeChecksumToken);
             var response = request.Execute();
+            var refreshRequest = new RefreshRequest()
+            {
+                googleFiles = response.Files,
+                getSetting = GetSetting,
+                changeHandler = changeHandler 
+            };
+
+            try
+            {
+                _mirrorHandler.RefreshFiles(driveService, in refreshRequest);
+            }
+            catch (Exception e)
+            {
+                Debug.LogException(new Exception("[GDriveMirror.Refresh] refresh files failed", e));
+                return;
+            }
             
-            _mirrorHandler.RefreshFiles(service.Files, response.Files, GetSetting);
+            GDriveMirrorSetting.GetSetting().changeChecksumToken = newChecksumToken;
             _logger.LogInfo("[GDriveMirror.Refresh] refresh files succeed");
         }
 
         private Res<Optional<SettingItem>, Exception> GetSetting(File file)
         {
             var filesSetting = GDriveMirrorSetting.GetSetting(); 
-            if(filesSetting == null || filesSetting.mirrorMap == null)
+            if(filesSetting == null || filesSetting.settingMap == null)
                 return Res.Err<Optional<SettingItem>>(new Exception("GDriveMirrorSetting is not initialized."));
 
-            if (!filesSetting.mirrorMap.TryGetValue(file.Id, out var setting))
+            if (!filesSetting.settingMap.TryGetValue(file.Id, out var setting))
             {
                 return Res.Ok(Optional.None<SettingItem>());
             }

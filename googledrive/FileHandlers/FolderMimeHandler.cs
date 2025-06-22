@@ -3,10 +3,12 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using cfEngine.Util;
 using cfUnityEngine.Util;
 using Google.Apis.Download;
 using Google.Apis.Drive.v3;
 using UnityEngine;
+using Path = System.IO.Path;
 
 namespace cfUnityEngine.GoogleDrive
 {
@@ -48,36 +50,94 @@ namespace cfUnityEngine.GoogleDrive
                 isCommitted = true;
             }
         }
-        
-        public IDownloadProgress DownloadWithStatus(FilesResource filesResource, in FileHandler.DownloadRequest downloadRequest)
+
+        public IEnumerable<FileHandler.FileItem> GetFolderContent(FilesResource filesResource, string googleFileId)
         {
-            var googleFileId = downloadRequest.googleFileId;
             var subItemRequest = CreateGoogleFolderItemRequest(filesResource, googleFileId);
-            var result =  subItemRequest.Execute();
-            var folderItems = result.Files;
-            var directory = new DirectoryInfo(Path.Combine(downloadRequest.rootDirectoryInfo.FullName, downloadRequest.localName));
-            if (directory.Exists)
+            var result = subItemRequest.Execute();
+            var googleFolderItems = result.Files;
+            if (googleFolderItems.Count == 0)
+                return Array.Empty<FileHandler.FileItem>();
+            
+            var fileItems = new List<FileHandler.FileItem>(googleFolderItems.Count);
+            foreach (var folderItem in googleFolderItems)
             {
-                directory.Delete(true);
-                Debug.Log($"[FolderMimeHandler.DownloadWithStatus] Clearing existing directory: {directory.FullName}");
+                using var pathBuilder = new PathSegmentBuilder();
+                fileItems.Add(new FileHandler.FileItem()
+                {
+                    googleFile = folderItem,
+                    RelativePathSegment = pathBuilder.AppendPath(folderItem.Name).Build(),
+                });
             }
 
-            var downloadProgress = new DownloadProgress(); 
-            foreach (var folderItem in folderItems)
+            return fileItems;
+        }
+
+        public async Task<IEnumerable<FileHandler.FileItem>> GetFolderContentAsync(FilesResource filesResource, string googleFileId)
+        {          
+            var subItemRequest = CreateGoogleFolderItemRequest(filesResource, googleFileId);
+            var result = await subItemRequest.ExecuteAsync();
+            var googleFolderItems = result.Files;
+            if (googleFolderItems.Count == 0)
+                return Array.Empty<FileHandler.FileItem>();
+            
+            var fileItems = new List<FileHandler.FileItem>(googleFolderItems.Count);
+            foreach (var folderItem in googleFolderItems)
             {
-                var fullPath = Path.Combine(directory.FullName, folderItem.Name);
-                DirectoryUtil.CreateAssetDirectoryIfNotExists(Path.GetDirectoryName(fullPath));
-                if (!GoogleDriveUtil.MimeFileHandlers.TryGetValue(folderItem.MimeType, out var fileHandler))
+                using var pathBuilder = new PathSegmentBuilder();
+                fileItems.Add(new FileHandler.FileItem()
                 {
-                    Debug.LogWarning($"[FolderMimeHandler.DownloadWithStatus] No handler for mime type: {folderItem.MimeType}, file: {folderItem.Name} (ID: {folderItem.Id})");
+                    googleFile = folderItem,
+                    RelativePathSegment = pathBuilder.AppendPath(folderItem.Name).Build(),
+                });
+            }
+
+            return fileItems;
+        }
+
+        public IDownloadProgress DownloadWithStatus(FilesResource filesResource, in FileHandler.DownloadRequest downloadRequest)
+        {
+            var changeHandler = downloadRequest.changeHandler;
+            var folderContent = GetFolderContent(filesResource, downloadRequest.googleFileId);
+            var directory = new DirectoryInfo(Path.Combine(downloadRequest.rootDirectoryInfo.FullName, downloadRequest.localName));
+            
+            var downloadProgress = new DownloadProgress(); 
+            foreach (var folderFile in folderContent)
+            {
+                var googleFile = folderFile.googleFile;
+                if (!changeHandler.TryGetFileChange(googleFile, out var getChangeInfo) || !getChangeInfo.HasValue)
+                {
+                    Debug.Log($"[FolderMimeHandler.DownloadWithStatus] File not changed, skipping download: {googleFile.Name}");
+                    continue;
+                }
+
+                var fullPath = Path.Combine(directory.FullName, folderFile.RelativePathSegment.GetOsPath());
+                var changeInfo = getChangeInfo.Value;
+                if (changeInfo.type == ChangeType.Removed)
+                {
+                    if (File.Exists(fullPath))
+                    {
+                        File.Delete(fullPath);
+                    } else if (Directory.Exists(fullPath))
+                    {
+                        Directory.Delete(fullPath, true);
+                    }
+                    continue;
+                }
+                
+                DirectoryUtil.CreateAssetDirectoryIfNotExists(Path.GetDirectoryName(fullPath));
+                if (!GoogleDriveUtil.MimeFileHandlers.TryGetValue(googleFile.MimeType, out var fileHandler))
+                {
+                    Debug.LogWarning($"[FolderMimeHandler.DownloadWithStatus] No handler for mime type: {googleFile.MimeType}, file: {googleFile.Name} (ID: {googleFile.Id})");
                     continue;
                 }
 
                 var progress = fileHandler.DownloadWithStatus(filesResource, new FileHandler.DownloadRequest()
                 {
-                    googleFileId = folderItem.Id,
+                    googleFileId = googleFile.Id,
                     rootDirectoryInfo = directory,
-                    localName =  folderItem.Name,
+                    localName =  googleFile.Name,
+                    changeHandler = changeHandler
                 });
                 downloadProgress.AddProgress(progress);
             }
@@ -87,10 +147,7 @@ namespace cfUnityEngine.GoogleDrive
 
         public async Task<IDownloadProgress> DownloadAsync(FilesResource filesResource, FileHandler.DownloadRequest downloadRequest)
         {
-            var googleFileId = downloadRequest.googleFileId;
-            var subItemRequest = CreateGoogleFolderItemRequest(filesResource, googleFileId);
-            var result = await subItemRequest.ExecuteAsync();
-            var folderItems = result.Files;
+            var folderContent = await GetFolderContentAsync(filesResource, downloadRequest.googleFileId);
             var directory = new DirectoryInfo(Path.Combine(downloadRequest.rootDirectoryInfo.FullName, downloadRequest.localName));
             if (directory.Exists)
             {
@@ -98,21 +155,23 @@ namespace cfUnityEngine.GoogleDrive
                 Debug.Log($"[FolderMimeHandler.DownloadAsync] Clearing existing directory: {directory.FullName}");
             }
             var downloadProgress = new DownloadProgress();
-            foreach (var folderItem in folderItems)
+            foreach (var folderFile in folderContent)
             {
-                var fullPath = Path.Combine(directory.FullName, folderItem.Name);
+                var googleFile = folderFile.googleFile;
+                var fullPath = Path.Combine(directory.FullName, folderFile.RelativePathSegment.GetOsPath());
                 DirectoryUtil.CreateAssetDirectoryIfNotExists(Path.GetDirectoryName(fullPath));
-                if (!GoogleDriveUtil.MimeFileHandlers.TryGetValue(folderItem.MimeType, out var fileHandler))
+                if (!GoogleDriveUtil.MimeFileHandlers.TryGetValue(googleFile.MimeType, out var fileHandler))
                 {
-                    Debug.LogWarning($"[FolderMimeHandler.DownloadAsync] No handler for mime type: {folderItem.MimeType}, file: {folderItem.Name} (ID: {folderItem.Id})");
+                    Debug.LogWarning($"[FolderMimeHandler.DownloadAsync] No handler for mime type: {googleFile.MimeType}, file: {googleFile.Name} (ID: {googleFile.Id})");
                     continue;
                 }
 
                 var progress = await fileHandler.DownloadAsync(filesResource, new FileHandler.DownloadRequest()
                 {
-                    googleFileId = folderItem.Id,
+                    googleFileId = googleFile.Id,
                     rootDirectoryInfo = directory,
-                    localName =  folderItem.Name,
+                    localName =  googleFile.Name,
+                    changeHandler = downloadRequest.changeHandler
                 });
                 downloadProgress.AddProgress(progress);
             }
