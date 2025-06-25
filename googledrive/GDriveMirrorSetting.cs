@@ -46,12 +46,6 @@ namespace cfUnityEngine.GoogleDrive
         public Dictionary<string, SettingItem> settingMap => _settingMap;
 
         [MethodButton]
-        private void Refresh_Test()
-        {
-            GDriveMirror.instance.Refresh();
-        }
-
-        [MethodButton]
         private void Refresh()
         {
             Debug.Log("[GDriveMirrorSetting.Refresh] refresh started");
