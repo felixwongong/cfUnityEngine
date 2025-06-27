@@ -18,7 +18,7 @@ namespace cfUnityEngine
         public event Action<string, float> onPropertyFloatChanged;
         public event Action<string, bool> onPropertyBoolChanged;
 
-        protected void OnPropertyChanged<T>(string propertyName, T value)
+        public void OnPropertyChanged<T>(string propertyName, T value)
         {
             if (value is int intValue)
                 onPropertyIntChanged?.Invoke(propertyName, intValue);

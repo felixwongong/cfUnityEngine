@@ -6,13 +6,13 @@ public class PrefabPool<T> : ObjectPool<T> where T: Component
 {
     private readonly Transform _poolRoot;
 
-    public PrefabPool(T prefab, bool createPoolRoot)
-        : this(prefab, createPoolRoot ? CreatePoolRoot(prefab.name): null)
+    public PrefabPool(T prefab, bool createPoolRoot, int warmupSize = 0)
+        : this(prefab, createPoolRoot ? CreatePoolRoot(prefab.name): null, warmupSize)
     {
     }
     
-    public PrefabPool(T prefab, Transform poolRoot) 
-        : base(() => CreateInstance(prefab), disposed => ReleaseInstance(disposed, poolRoot))
+    public PrefabPool(T prefab, Transform poolRoot, int warmupSize = 0) 
+        : base(() => CreateInstance(prefab), disposed => ReleaseInstance(disposed, poolRoot), warmupSize)
     {
         _poolRoot = poolRoot;
     }
@@ -46,8 +46,7 @@ public class PrefabPool<T> : ObjectPool<T> where T: Component
 
     private static void ReleaseInstance(T instance, Transform poolRoot)
     {
+        instance.transform.SetParent(poolRoot);
         instance.gameObject.SetActive(false);
-        
-        NextFrame.Instance.Execute(() => instance.transform.SetParent(poolRoot));
     }
 }
