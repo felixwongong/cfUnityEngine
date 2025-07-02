@@ -2,7 +2,12 @@ using cfEngine.Pooling;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
-public class PrefabPool<T> : ObjectPool<T> where T: Component
+public interface IPoolableObject
+{
+    public void Clear();
+}
+
+public class PrefabPool<T> : ObjectPool<T> where T: Component, IPoolableObject
 {
     private readonly Transform _poolRoot;
 

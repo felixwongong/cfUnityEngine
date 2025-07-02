@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 namespace cfUnityEngine
@@ -5,6 +6,15 @@ namespace cfUnityEngine
     public abstract class PropertyResolverBase<TValueType> : MonoBehaviour
     {
         [SerializeField] protected string propertyName;
+        [SerializeField] private bool useGameObjectName;
+
+        private void Awake()
+        {
+            if (useGameObjectName)
+            {
+                propertyName = gameObject.name;
+            }
+        }
 
         public void Resolve(string resolveProperty, TValueType value)
         {

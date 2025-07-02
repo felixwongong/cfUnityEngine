@@ -7,25 +7,26 @@ namespace cfUnityEngine.Editor
     [CustomEditor(typeof(PropertyBoolBinder), editorForChildClasses:true)]
     public class PropertyBoolBinderEditor : FieldDrawerEditor
     {
-        protected override FieldInfo GetField() => typeof(PropertyBoolBinder).BaseType?.GetField("_cachedValueMap", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.GetField);
+        protected override FieldInfo GetField() => typeof(PropertyBoolBinder).BaseType?.GetField("_valueCacheMap", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.GetField);
     }
     
     [CustomEditor(typeof(PropertyFloatBinder), editorForChildClasses:true)]
     public class PropertyFloatBinderEditor : FieldDrawerEditor
     {
-        protected override FieldInfo GetField() => typeof(PropertyFloatBinder).BaseType?.GetField("_cachedValueMap", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.GetField);
+        protected override FieldInfo GetField() => typeof(PropertyFloatBinder).BaseType?.GetField("_valueCacheMap", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.GetField);
     }
     
     [CustomEditor(typeof(PropertyIntBinder), editorForChildClasses:true)]
     public class PropertyIntBinderEditor : FieldDrawerEditor
     {
-        protected override FieldInfo GetField() => typeof(PropertyIntBinder).BaseType?.GetField("_cachedValueMap", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.GetField);
+        protected override FieldInfo GetField() => typeof(PropertyIntBinder).BaseType?.GetField("_valueCacheMap", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.GetField);
     }
+    
     
     [CustomEditor(typeof(PropertyObjectBinder), editorForChildClasses:true)]
     public class PropertyObjectBinderEditor : FieldDrawerEditor
     {
-        protected override FieldInfo GetField() => typeof(PropertyObjectBinder).BaseType?.GetField("_cachedValueMap", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.GetField);
+        protected override FieldInfo GetField() => typeof(PropertyObjectBinder).BaseType?.GetField("_valueCacheMap", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.GetField | BindingFlags.FlattenHierarchy);
     }
     
     public abstract class FieldDrawerEditor : UnityEditor.Editor

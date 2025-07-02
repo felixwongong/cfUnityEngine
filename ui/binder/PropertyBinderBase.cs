@@ -11,9 +11,8 @@ namespace cfUnityEngine
 
     public abstract class PropertyBinderBase<T, TValueType> : MonoBehaviour, IPropertyBinder where T: MonoBehaviour, IPropertyResolver<TValueType>
     {
-#if UNITY_EDITOR
-        [UnityEngine.Scripting.Preserve] private Dictionary<string, TValueType> _cachedValueMap = new();
-#endif
+        private Dictionary<string, TValueType> _valueCacheMap = new();
+
         [SerializeField] protected List<T> resolvers;
         private IPropertySource source { get; set; }
 
@@ -38,15 +37,13 @@ namespace cfUnityEngine
         
         protected void OnSourcePropertyChanged(string propertyName, TValueType value)
         {
-            Resolve(resolvers, propertyName, value);
+            Resolve(propertyName, value);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        protected void Resolve<TResolver, TValue>(IReadOnlyList<TResolver> resolvers, string propertyName, TValue value) where TResolver: IPropertyResolver<TValue> where TValue: TValueType
+        protected void Resolve(string propertyName, TValueType value)
         {
-#if UNITY_EDITOR
-            _cachedValueMap[propertyName] = value;
-#endif
+            _valueCacheMap[propertyName] = value;
             
             for (var i = 0; i < resolvers.Count; i++)
             {
