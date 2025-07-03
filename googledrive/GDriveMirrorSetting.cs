@@ -15,16 +15,10 @@ namespace cfUnityEngine.GoogleDrive
         [AssetPath]
         [SerializeField] private string _serviceAccountCredentialJsonPath;
 
-        private string _serviceAccountCredentialJson = string.Empty;
         public string serviceAccountCredentialJson
         {
             get
             {
-                if (!string.IsNullOrEmpty(_serviceAccountCredentialJson))
-                {
-                    return _serviceAccountCredentialJson;
-                }
-
                 var assetPath = _serviceAccountCredentialJsonPath;
                 var asset = AssetDatabase.LoadAssetAtPath<TextAsset>($"Assets/{assetPath}");
                 if (asset == null)
@@ -32,8 +26,7 @@ namespace cfUnityEngine.GoogleDrive
                     Debug.LogError($"[GDriveMirrorSetting.serviceAccountCredentialJson] Asset is not a TextAsset: {assetPath}");
                     return string.Empty;
                 }
-                _serviceAccountCredentialJson = asset.text;
-                return _serviceAccountCredentialJson;
+                return asset.text;
             }
         }
         [ReadOnly]
