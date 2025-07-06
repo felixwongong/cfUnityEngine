@@ -2,22 +2,32 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using System.Text.Json.Serialization;
 using UnityEngine;
 
 namespace cfUnityEngine.Util
 {
     [Serializable]
-    public class GridMap<T>: IEnumerable<T>
+    public class GridMap<T>: IEnumerable<(Vector3Int position, T)>
+#if UNITY_EDITOR
+        ,ISerializationCallbackReceiver
+#endif
     {
         [SerializeField]
         private Vector3Int _dimensions;
         [SerializeField]
         private List<T> _list;
+        private readonly Func<T> _createFn;
         
         public Vector3Int dimensions => _dimensions;
 
         public GridMap(Vector3Int dimensions, Func<T> createFn)
         {
+            _createFn = createFn;
+            _dimensions = new Vector3Int(
+                Mathf.Max(1, dimensions.x),
+                Mathf.Max(1, dimensions.y),
+                Mathf.Max(1, dimensions.z));
             var dimension = dimensions.x * dimensions.y * dimensions.z;
             _list = new List<T>(dimension);
             for (int i = 0; i < dimension; i++)
@@ -75,14 +85,52 @@ namespace cfUnityEngine.Util
             return GetPositionUnsafe(index);
         }
 
-        public IEnumerator<T> GetEnumerator()
+        public IEnumerator<(Vector3Int position, T)> GetEnumerator()
         {
-            return _list.GetEnumerator();
+            for (var i = 0; i < _list.Count; i++)
+            {
+                var position = GetPositionUnsafe(i);
+                yield return (position, _list[i]);
+            }
         }
 
         IEnumerator IEnumerable.GetEnumerator()
         {
             return GetEnumerator();
         }
+        
+#if UNITY_EDITOR
+        public void OnBeforeSerialize()
+        {
+            _dimensions = new Vector3Int(
+                Mathf.Max(1, _dimensions.x),
+                Mathf.Max(1, _dimensions.y),
+                Mathf.Max(1, _dimensions.z));
+
+            var listSize = _dimensions.x * _dimensions.y * _dimensions.z;
+            if (_list == null || _list.Count != listSize)
+            {
+                _list = new List<T>(listSize);
+                for (int i = 0; i < listSize; i++)
+                {
+                    _list.Add(_createFn != null ? _createFn() : default);
+                }
+            }
+            else
+            {
+                for (int i = 0; i < _list.Count; i++)
+                {
+                    if (_list[i] == null)
+                    {
+                        _list[i] = _createFn != null ? _createFn() : default;
+                    }
+                }
+            }
+        }
+
+        public void OnAfterDeserialize()
+        {
+        }
+#endif
     }
 }

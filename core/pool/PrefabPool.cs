@@ -17,7 +17,7 @@ public class PrefabPool<T> : ObjectPool<T> where T: Component, IPoolableObject
     }
     
     public PrefabPool(T prefab, Transform poolRoot, int warmupSize = 0) 
-        : base(() => CreateInstance(prefab), disposed => ReleaseInstance(disposed, poolRoot), warmupSize)
+        : base(() => CreateInstance(prefab), GetInstance, disposed => ReleaseInstance(disposed, poolRoot), warmupSize)
     {
         _poolRoot = poolRoot;
     }
@@ -44,9 +44,15 @@ public class PrefabPool<T> : ObjectPool<T> where T: Component, IPoolableObject
     
     private static T CreateInstance(T prefab)
     {
-        
         var instance = Object.Instantiate(prefab);
         return instance;
+    }
+    
+    private static void GetInstance(T instance)
+    {
+        instance.gameObject.SetActive(true);
+        instance.transform.SetParent(null);
+        instance.Clear();
     }
 
     private static void ReleaseInstance(T instance, Transform poolRoot)
