@@ -16,7 +16,7 @@ namespace cfUnityEngine.Info
 {
     public abstract class ScriptableInfo<TInfo> : ScriptableObject
     {
-        public abstract List<TInfo> getInfos { get; }
+        public abstract IReadOnlyList<TInfo> getInfos { get; }
     }
     
     public class EditorScriptableObjectLoader<TInfo>: IValueLoader<TInfo>
