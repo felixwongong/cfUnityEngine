@@ -103,12 +103,12 @@ namespace cfUnityEngine.GoogleDrive
     [Serializable]
     public class SettingItem
     {
+        [ReadOnly]
+        public string googleFileName;
         public string assetNameOverride;
         public string assetFolderPath;
         [DriveUrlLink]
         public string googleDriveLink;
-        [ReadOnly]
-        public string googleFileName;
         [SerializeField,HideInInspector]
         public List<string> googleFiles;
 
