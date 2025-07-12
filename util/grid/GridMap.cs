@@ -41,6 +41,19 @@ namespace cfUnityEngine.Util
             get => _list[GetIndex(position)];
             set => _list[GetIndex(position)] = value;
         }
+
+        public bool Remove(Vector3Int position)
+        {
+            var defaultValue = _createFn();
+            var currentValue = this[position];
+            if(currentValue == null || EqualityComparer<T>.Default.Equals(currentValue, defaultValue))
+            {
+                return false;
+            }
+            
+            this[position] = defaultValue;
+            return true;
+        }
         
         public bool IsOutOfBounds(Vector3Int position)
         {
@@ -100,7 +113,7 @@ namespace cfUnityEngine.Util
         }
         
 #if UNITY_EDITOR
-        public void OnBeforeSerialize()
+        void ISerializationCallbackReceiver.OnBeforeSerialize()
         {
             _dimensions = new Vector3Int(
                 Mathf.Max(1, _dimensions.x),
@@ -128,7 +141,7 @@ namespace cfUnityEngine.Util
             }
         }
 
-        public void OnAfterDeserialize()
+        void ISerializationCallbackReceiver.OnAfterDeserialize()
         {
         }
 #endif
