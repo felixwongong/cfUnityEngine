@@ -24,7 +24,7 @@ namespace cfUnityEngine.Util
 
         private Relay<StateChangeRecord<TStateId>> _beforeStateChangeRelay;
         private Relay<StateChangeRecord<TStateId>> _afterStateChangeRelay;
-        
+
         public Subscription SubscribeBeforeStateChange(Action<StateChangeRecord<TStateId>> listener)
         {
             _beforeStateChangeRelay ??= new Relay<StateChangeRecord<TStateId>>(this);
@@ -104,12 +104,12 @@ namespace cfUnityEngine.Util
             state.SetStateMachine((TStateMachine)this);
         }
 
-        public bool CanGoToState(TStateId id)
+        public bool CanGoToState(TStateId id, StateParam param)
         {
-            return TryGetState(id, out var nextState) && nextState.IsReady();
+            return TryGetState(id, out var nextState) && nextState.IsReady(param);
         }
 
-        public bool TryGoToState(TStateId nextStateId, in StateParam param = null)
+        public bool TryGoToState(TStateId nextStateId, StateParam param = null)
         {
             try
             {
@@ -119,7 +119,7 @@ namespace cfUnityEngine.Util
                     return false;
                 }
 
-                if (!CanGoToState(nextState.Id))
+                if (!CanGoToState(nextState.Id, param))
                 {
                     Log.LogException(new ArgumentException(
                         $"Cannot go to state {nextState.Id}, not in current state {currentState.Id} whitelist"));
@@ -153,7 +153,7 @@ namespace cfUnityEngine.Util
             }
         }
 
-        public void ForceGoToState(TStateId nextStateId, in StateParam param = null)
+        public void ForceGoToState(TStateId nextStateId, StateParam param = null)
         {
             try
             {

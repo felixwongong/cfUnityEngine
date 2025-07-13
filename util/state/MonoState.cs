@@ -39,7 +39,7 @@ namespace cfUnityEngine.Util
 
         public virtual void _Update() { }
 
-        public virtual bool IsReady() => true;
+        public virtual bool IsReady(StateParam param) => true;
         public virtual bool CanUpdate() => true;
 
         internal void StartContext(StateParam param)
