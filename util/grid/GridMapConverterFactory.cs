@@ -44,6 +44,8 @@ namespace cfUnityEngine.Util
 
             reader.Read();
             var dimensions = JsonSerializer.Deserialize<Vector3Int>(ref reader, options);
+            reader.Read();
+            var startPosition = JsonSerializer.Deserialize<Vector3Int>(ref reader, options);
             reader.Read();  //consume EndObject
 
             if (reader.TokenType != JsonTokenType.PropertyName)
@@ -53,7 +55,7 @@ namespace cfUnityEngine.Util
             if (reader.TokenType != JsonTokenType.StartArray)
                 throw new JsonException();
             
-            GridMap<T> gridMap = new GridMap<T>(dimensions, () => default);
+            GridMap<T> gridMap = new GridMap<T>(dimensions, () => default, startPosition);
             var position = new Vector3Int();
             while (reader.Read())
             {
@@ -87,6 +89,8 @@ namespace cfUnityEngine.Util
             writer.WriteStartObject();
             writer.WritePropertyName("dimensions");
             JsonSerializer.Serialize(writer, value.dimensions, options);
+            writer.WritePropertyName("startPosition");
+            JsonSerializer.Serialize(writer, value.startPosition, options);
 
             writer.WritePropertyName("grids");
             writer.WriteStartArray();

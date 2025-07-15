@@ -13,17 +13,18 @@ namespace cfUnityEngine.Util
         ,ISerializationCallbackReceiver
 #endif
     {
-        [SerializeField]
-        private Vector3Int _dimensions;
-        [SerializeField]
-        private List<T> _list;
+        [SerializeField] private Vector3Int _dimensions;
+        [SerializeField] private Vector3Int _startPosition;
+        [SerializeField] private List<T> _list;
         private readonly Func<T> _createFn;
         
         public Vector3Int dimensions => _dimensions;
+        public Vector3Int startPosition => _startPosition;
 
-        public GridMap(Vector3Int dimensions, Func<T> createFn)
+        public GridMap(Vector3Int dimensions, Func<T> createFn, Vector3Int startPosition = default)
         {
             _createFn = createFn;
+            _startPosition = startPosition;
             _dimensions = new Vector3Int(
                 Mathf.Max(1, dimensions.x),
                 Mathf.Max(1, dimensions.y),
@@ -38,25 +39,27 @@ namespace cfUnityEngine.Util
         
         public T this[Vector3Int position]
         {
-            get => _list[GetIndex(position)];
-            set => _list[GetIndex(position)] = value;
+            get => _list[GetIndex(ToLocal(position))];
+            set => _list[GetIndex(ToLocal(position))] = value;
         }
 
         public bool Remove(Vector3Int position)
         {
             var defaultValue = _createFn();
-            var currentValue = this[position];
+            var localPosition = ToLocal(position);
+            var currentValue = this[localPosition];
             if(currentValue == null || EqualityComparer<T>.Default.Equals(currentValue, defaultValue))
             {
                 return false;
             }
             
-            this[position] = defaultValue;
+            this[localPosition] = defaultValue;
             return true;
         }
         
         public bool IsOutOfBounds(Vector3Int position)
         {
+            position = ToLocal(position);
             return position.x < 0 || position.y < 0 || position.z < 0 ||
                    position.x >= _dimensions.x || position.y >= _dimensions.y || position.z >= _dimensions.z;
         }
@@ -64,6 +67,7 @@ namespace cfUnityEngine.Util
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public int GetIndexUnsafe(Vector3Int position)
         {
+            position = ToLocal(position);
             return position.x + position.y * _dimensions.x + position.z * _dimensions.x * _dimensions.y;
         }
         
@@ -84,7 +88,7 @@ namespace cfUnityEngine.Util
             int z = index / (_dimensions.x * _dimensions.y);
             int y = (index - z * _dimensions.x * _dimensions.y) / _dimensions.x;
             int x = index - z * _dimensions.x * _dimensions.y - y * _dimensions.x;
-            return new Vector3Int(x, y, z);
+            return ToWorld(new Vector3Int(x, y, z));
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -96,6 +100,18 @@ namespace cfUnityEngine.Util
             }
             
             return GetPositionUnsafe(index);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private Vector3Int ToLocal(Vector3Int position)
+        {
+            return position - _startPosition;
+        }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private Vector3Int ToWorld(Vector3Int position)
+        {
+            return position + _startPosition;
         }
 
         public IEnumerator<(Vector3Int position, T)> GetEnumerator()
