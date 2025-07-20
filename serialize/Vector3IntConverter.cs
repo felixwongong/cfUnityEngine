@@ -3,7 +3,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using UnityEngine;
 
-namespace cfUnityEngine.Util
+namespace cfUnityEngine.Serialize
 {
     public class Vector3IntConverter: JsonConverter<Vector3Int>
     {
