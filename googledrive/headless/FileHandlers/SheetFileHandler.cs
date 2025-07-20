@@ -1,5 +1,4 @@
 using System.IO;
-using System.Text;
 using System.Threading.Tasks;
 using cfEngine.Serialize;
 using CofyDev.Xml.Doc;

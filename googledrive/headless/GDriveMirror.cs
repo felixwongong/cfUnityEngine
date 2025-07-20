@@ -8,7 +8,6 @@ using Google.Apis.Download;
 using Google.Apis.Drive.v3;
 using Google.Apis.Drive.v3.Data;
 using Google.Apis.Services;
-using UnityEngine;
 using GoogleFile = Google.Apis.Drive.v3.Data.File;
 using ILogger = cfEngine.Logging.ILogger;
 
@@ -44,7 +43,6 @@ namespace cfUnityEngine.GoogleDrive
     {
         IAsyncEnumerable<RefreshStatus> RefreshFilesAsync(DriveService driveService, RefreshRequest request);
         void RefreshFiles(DriveService driveService, in RefreshRequest request);
-        void ClearAssetDirectories(IEnumerable<string> assetFolderPaths);
     }
 
 
@@ -52,12 +50,12 @@ namespace cfUnityEngine.GoogleDrive
     {
         private CancellationTokenSource _refreshCancelToken;
         private readonly IFileMirrorHandler _mirrorHandler;
-        private readonly ILogger _logger;
+        private readonly ILogger logger;
 
         public GDriveMirror(IFileMirrorHandler mirrorHandler, ILogger logger)
         {
             _mirrorHandler = mirrorHandler;
-            _logger = logger;
+            this.logger = logger;
         }
 
         private DriveService CreateDriveService()
@@ -66,7 +64,7 @@ namespace cfUnityEngine.GoogleDrive
             var credentialJson = setting.serviceAccountCredentialJson;
             if (string.IsNullOrEmpty(credentialJson))
             {
-                _logger.LogInfo("[GDriveMirror.CreateFileRequest] setting.serviceAccountCredentialJson is null, refresh failed");
+                logger.LogInfo("[GDriveMirror.CreateFileRequest] setting.serviceAccountCredentialJson is null, refresh failed");
                 return null;
             }
 
@@ -100,7 +98,7 @@ namespace cfUnityEngine.GoogleDrive
         
         public async IAsyncEnumerable<RefreshStatus> RefreshAsync()
         {
-            _logger.LogInfo("[GDriveMirror.RefreshAsync] start refresh files");
+            logger.LogInfo("[GDriveMirror.RefreshAsync] start refresh files");
 
             _refreshCancelToken = new CancellationTokenSource();
             
@@ -110,7 +108,7 @@ namespace cfUnityEngine.GoogleDrive
             var request = CreateFileRequest(driveService);
             if(request == null) yield break;
 
-            var changeHandler = new ChangeHandler();
+            var changeHandler = new ChangeHandler(GoogleDriveUtil.unityLogger);
             var newChangeChecksumToken = await changeHandler.LoadChangesAsync(driveService, GDriveMirrorSetting.GetSetting().changeChecksumToken);
             var response = await request.ExecuteAsync(_refreshCancelToken.Token);
             var refreshRequest = new RefreshRequest()
@@ -126,14 +124,14 @@ namespace cfUnityEngine.GoogleDrive
             }
             
             GDriveMirrorSetting.GetSetting().changeChecksumToken = newChangeChecksumToken;
-            _logger.LogInfo("[GDriveMirror.RefreshAsync] refresh files succeed");
+            logger.LogInfo("[GDriveMirror.RefreshAsync] refresh files succeed");
 
             _refreshCancelToken = null;
         }
 
         public void Refresh()
         {
-            _logger.LogInfo("[GDriveMirror.Refresh] start refresh files");
+            logger.LogInfo("[GDriveMirror.Refresh] start refresh files");
             
             var driveService = CreateDriveService();
             if(driveService == null) return;
@@ -141,7 +139,7 @@ namespace cfUnityEngine.GoogleDrive
             var request = CreateFileRequest(driveService);
             if(request == null) return;
 
-            var changeHandler = new ChangeHandler();
+            var changeHandler = new ChangeHandler(GoogleDriveUtil.unityLogger);
             var newChecksumToken = changeHandler.LoadChanges(driveService, GDriveMirrorSetting.GetSetting().changeChecksumToken);
             var response = request.Execute();
             var refreshRequest = new RefreshRequest()
@@ -157,12 +155,12 @@ namespace cfUnityEngine.GoogleDrive
             }
             catch (Exception e)
             {
-                Debug.LogException(new Exception("[GDriveMirror.Refresh] refresh files failed", e));
+                logger.LogException(new Exception("[GDriveMirror.Refresh] refresh files failed", e));
                 return;
             }
             
             GDriveMirrorSetting.GetSetting().changeChecksumToken = newChecksumToken;
-            _logger.LogInfo("[GDriveMirror.Refresh] refresh files succeed");
+            logger.LogInfo("[GDriveMirror.Refresh] refresh files succeed");
         }
 
         private Res<Optional<SettingItem>, Exception> GetSetting(File file)

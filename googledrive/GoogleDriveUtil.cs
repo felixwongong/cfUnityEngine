@@ -1,7 +1,8 @@
 using System;
 using System.Collections.Generic;
 using cfEngine;
-using cfEngine.Util;
+using UnityEngine;
+using ILogger = cfEngine.Logging.ILogger;
 
 namespace cfUnityEngine.GoogleDrive
 {
@@ -26,10 +27,12 @@ namespace cfUnityEngine.GoogleDrive
     
     public static class GoogleDriveUtil
     {
+        public static readonly ILogger unityLogger = new UnityLogger();
+        
         public static IReadOnlyDictionary<string, FileHandler> MimeFileHandlers = new Dictionary<string, FileHandler>()
         {
             { "application/vnd.google-apps.spreadsheet", new SheetFileHandler() },
-            { "application/vnd.google-apps.folder", new FolderMimeHandler() },
+            { "application/vnd.google-apps.folder", new FolderMimeHandler(unityLogger, Application.dataPath) },
         };
 
 

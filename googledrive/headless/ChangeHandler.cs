@@ -1,9 +1,9 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using cfEngine;
+using cfEngine.Logging;
 using Google.Apis.Drive.v3;
 using Google.Apis.Drive.v3.Data;
-using UnityEngine;
 using GoogleFile = Google.Apis.Drive.v3.Data.File;
 
 namespace cfUnityEngine.GoogleDrive
@@ -34,6 +34,12 @@ namespace cfUnityEngine.GoogleDrive
         private bool isAllDirty = false;
         private List<Change> _changedFiles = new();
         public IReadOnlyList<Change> ChangedFiles => _changedFiles;
+
+        private readonly ILogger logger;
+        public ChangeHandler(ILogger logger)
+        {
+            this.logger = logger;
+        }
 
         public string LoadChanges(DriveService driveService, string startPageToken)
         {
@@ -95,7 +101,7 @@ namespace cfUnityEngine.GoogleDrive
         {
             if (!isInitialized)
             {
-                Debug.LogError("ChangeHandler is not initialized. Call LoadChanges or LoadChangesAsync first.");
+                logger.LogError("ChangeHandler is not initialized. Call LoadChanges or LoadChangesAsync first.");
                 return false;
             }
             
@@ -110,7 +116,7 @@ namespace cfUnityEngine.GoogleDrive
             changeInfo = null;
             if (!isInitialized)
             {
-                Debug.LogError("ChangeHandler is not initialized. Call LoadChanges or LoadChangesAsync first.");
+                logger.LogError("ChangeHandler is not initialized. Call LoadChanges or LoadChangesAsync first.");
                 return false;
             }
             if (isAllDirty)

@@ -1,11 +1,10 @@
 #if CF_GOOGLE_DRIVE && UNITY_EDITOR
 
 using System.Collections.Generic;
-using System.IO;
-using cfUnityEngine.Util;
+using cfEngine.Logging;
+using cfEngine.Util;
 using Google.Apis.Download;
 using Google.Apis.Drive.v3;
-using UnityEngine;
 using GoogleFile = Google.Apis.Drive.v3.Data.File;
 using SystemFile = System.IO.File;
 
@@ -13,6 +12,15 @@ namespace cfUnityEngine.GoogleDrive
 {
     public class AssetDirectFileMirror : IFileMirrorHandler
     {
+        private readonly ILogger logger;
+        private readonly string assetDirectoryPath;
+        
+        public AssetDirectFileMirror(ILogger logger, string assetDirectoryPath)
+        {
+            this.logger = logger;
+            this.assetDirectoryPath = assetDirectoryPath;
+        }
+
         public async IAsyncEnumerable<RefreshStatus> RefreshFilesAsync(DriveService driveService, RefreshRequest request)
         {
             var googleFiles = request.googleFiles;
@@ -25,7 +33,7 @@ namespace cfUnityEngine.GoogleDrive
                 var getFileSetting = getSetting(googleFile);
                 if (getFileSetting.TryGetError(out var error))
                 {
-                    Debug.LogError(error);
+                    logger.LogException(error);
                     continue;
                 }
                 
@@ -34,11 +42,11 @@ namespace cfUnityEngine.GoogleDrive
                 
                 if (!GoogleDriveUtil.MimeFileHandlers.TryGetValue(googleFile.MimeType, out var handler))
                 {
-                    Debug.Log($"[AssetDirectFileMirror.RefreshFilesAsync] No handler found for mime type: {googleFile.MimeType}");
+                    logger.LogInfo($"[AssetDirectFileMirror.RefreshFilesAsync] No handler found for mime type: {googleFile.MimeType}");
                     continue;
                 }   
                 
-                var directory = DirectoryUtil.CreateAssetDirectoryIfNotExists(setting.assetFolderPath);
+                var directory = DirectoryUtil.CreateDirectoryIfNotExists(assetDirectoryPath, setting.assetFolderPath);
                 var localFileName = GetLocalFileName(googleFile, setting);
                 
                 var result = await handler.DownloadAsync(
@@ -72,7 +80,7 @@ namespace cfUnityEngine.GoogleDrive
                 var getFileSetting = getSetting(googleFile);
                 if (getFileSetting.TryGetError(out var err))
                 {
-                    Debug.LogError(err);
+                    logger.LogException(err);
                     continue;
                 }
 
@@ -81,11 +89,11 @@ namespace cfUnityEngine.GoogleDrive
 
                 if (!GoogleDriveUtil.MimeFileHandlers.TryGetValue(googleFile.MimeType, out var handler))
                 {
-                    Debug.Log($"[AssetDirectFileMirror.RefreshFiles] No handler found for mime type: {googleFile.MimeType}");
+                    logger.LogInfo($"[AssetDirectFileMirror.RefreshFiles] No handler found for mime type: {googleFile.MimeType}");
                     continue;
                 }
 
-                var directory = DirectoryUtil.CreateAssetDirectoryIfNotExists(setting.assetFolderPath);
+                var directory = DirectoryUtil.CreateDirectoryIfNotExists(assetDirectoryPath, setting.assetFolderPath);
                 var localFileName = GetLocalFileName(googleFile, setting);
                 
                 var result = handler.DownloadWithStatus(
@@ -112,19 +120,6 @@ namespace cfUnityEngine.GoogleDrive
             }
         }
 
-        public void ClearAssetDirectories(IEnumerable<string> assetFolderPaths)
-        {
-            foreach (var assetFolderPath in assetFolderPaths)
-            {
-                var absolutePath = Path.Combine(Application.dataPath, assetFolderPath);
-                var directoryInfo = new DirectoryInfo(absolutePath);
-                if (!directoryInfo.Exists)
-                    continue;
-                
-                directoryInfo.Delete(true);
-            }
-        }
-
         private string GetLocalFileName(GoogleFile googleFile, SettingItem setting)
         {
             var localAssetName = setting.assetNameOverride;
@@ -141,13 +136,13 @@ namespace cfUnityEngine.GoogleDrive
             switch (progress.Status)
             {
                 case DownloadStatus.Completed:
-                    Debug.Log($"[AssetDirectFileMirror.RefreshFiles] Download completed, google file: {googleFile.Name}");
+                    logger.LogInfo($"[AssetDirectFileMirror.RefreshFiles] Download completed, google file: {googleFile.Name}");
                     break;
                 case DownloadStatus.Failed:
-                    Debug.LogError($"[AssetDirectFileMirror.RefreshFiles] Download failed, google file: {googleFile.Name}, status: {progress.Status}\n Error: {progress.Exception?.Message}");
+                    logger.LogError($"[AssetDirectFileMirror.RefreshFiles] Download failed, google file: {googleFile.Name}, status: {progress.Status}\n Error: {progress.Exception?.Message}");
                     break;
                 default:
-                    Debug.LogWarning($"[AssetDirectFileMirror.RefreshFiles] Download status: {progress.Status}, google file: {googleFile.WritersCanShare}");
+                    logger.LogWarning($"[AssetDirectFileMirror.RefreshFiles] Download status: {progress.Status}, google file: {googleFile.WritersCanShare}");
                     break;
             }
         }

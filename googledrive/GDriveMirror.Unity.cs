@@ -2,6 +2,7 @@ using System;
 using System.Threading.Tasks;
 using UnityEditor;
 using UnityEngine;
+using ILogger = cfEngine.Logging.ILogger;
 
 namespace cfUnityEngine.GoogleDrive
 {
@@ -12,7 +13,8 @@ namespace cfUnityEngine.GoogleDrive
 
         static GDriveMirror()
         {
-            instance = new GDriveMirror(new AssetDirectFileMirror(), new UnityLogger());
+            ILogger logger = new UnityLogger();
+            instance = new GDriveMirror(new AssetDirectFileMirror(logger, Application.dataPath), logger);
         }
 
         public async Task RefreshWithProgressBar()
