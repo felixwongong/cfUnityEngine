@@ -33,7 +33,15 @@ namespace cfUnityEngine.Asset
             try
             {
                 var req = Resources.LoadAsync<T>(path);
-                await req;
+                var taskSource = new TaskCompletionSource<bool>();
+                req.completed += OnLoadCompleted;
+
+                void OnLoadCompleted(AsyncOperation aop)
+                {
+                    req.completed -= OnLoadCompleted;
+                    taskSource.SetResult(true);
+                }
+                await taskSource.Task;
 
                 var t = (T)req.asset;
                 return new AssetHandle<T>(t, () => { });
