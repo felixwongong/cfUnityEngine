@@ -3,6 +3,7 @@
     "rootNamespace": "cfUnityEngine",
     "references": [
         "cfEngine",
+        "CofyExcelParser",
         "Unity.Addressables",
         "Unity.ResourceManager",
         "Unity.2D.Animation.Runtime",

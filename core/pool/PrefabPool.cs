@@ -17,8 +17,8 @@ public class PrefabPool<T> : ObjectPool<T> where T: Component, IPoolableObject
     }
     
     public PrefabPool(T prefab, Transform poolRoot, int warmupSize = 0) 
-        : base(() => CreateInstance(prefab), GetInstance, disposed => ReleaseInstance(disposed, poolRoot), warmupSize)
-    {
+             : base(() => CreateInstance(prefab), GetInstance, disposed => ReleaseInstance(disposed, poolRoot), _ => {}, warmupSize)
+         {
         _poolRoot = poolRoot;
     }
 

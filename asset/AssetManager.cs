@@ -8,14 +8,14 @@ namespace cfUnityEngine.Core
         public const string Asset = "Asset";
     }
     
-    public static partial class GameExtension
+    public static partial class DomainExtension
     {
-        public static Game WithAsset(this Game game, AssetManager<UnityEngine.Object> service)
+        public static Domain WithAsset(this Domain domain, AssetManager<UnityEngine.Object> service)
         {
-            game.Register(service, ServiceName.Asset);
-            return game;
+            domain.Register(service, ServiceName.Asset);
+            return domain;
         }
         
-        public static AssetManager<UnityEngine.Object> GetAsset(this Game game) => game.GetService<AssetManager<UnityEngine.Object>>(ServiceName.Asset);
+        public static AssetManager<UnityEngine.Object> GetAsset(this Domain domain) => domain.GetService<AssetManager<UnityEngine.Object>>(ServiceName.Asset);
     }
 }

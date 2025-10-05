@@ -4,7 +4,8 @@
     "references": [
         "cfUnityEngine.Command",
         "cfEngine",
-        "cfUnityEngine"
+        "cfUnityEngine",
+        "CofyExcelParser"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

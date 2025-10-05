@@ -1,7 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using UnityEditor.Search;
 using UnityEditor.ShortcutManagement;
 using UnityEngine;
@@ -22,7 +20,7 @@ namespace cfEngine.Command
 
                 fetchItems = (context, items, provider) =>
                 {
-                    var words = context.searchQuery.Split(' ');
+                    var words = context.searchQuery.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
 
                     using var commandHandle = ListPool<string>.Get(out var commands);
                     using var argHandle = DictionaryPool<string, string>.Get(out var args);
@@ -30,41 +28,71 @@ namespace cfEngine.Command
                     ExtractCommandArgsFromWords(words, commands, args);
                     
                     var searchItems = new List<SearchItem>();
-                    var sb = new StringBuilder();
-                    foreach (var (keys, command) in CommandService.commandMap)
-                    {
-                        if(!IsPartialMatchKeys(commands, keys))
-                            continue;
-
-                        string description = $"Run command";;
-                        var hints = command.GetType().GetCustomAttributes(typeof(ICommand.HintAttribute), true);
-                        if (hints.Length > 0)
-                        {
-                            var hintAttribute = hints.FirstOrDefault() as ICommand.HintAttribute;
-                            if (hintAttribute != null)
-                            {
-                                description = hintAttribute.description;
-                            }
-                        }
-                        
-                        var id = sb.AppendJoin(' ', keys).ToString();
-                        var item = provider.CreateItem(context, id);
-                        item.description = description;
-                        item.thumbnail = (Texture2D)EditorGUIUtility.IconContent("d_console.infoicon").image;
-                        item.data = new CommandCall(context.searchQuery, command);
-                        searchItems.Add(item);
-
-                        sb.Clear();
-                    }
+                    
+                    FetchCommandsRecursive(
+                        CommandService.instance,
+                        commands,
+                        new List<string>(),
+                        searchItems,
+                        context,
+                        provider
+                    );
                     
                     return searchItems;
                 }
             };
         }
-
-        private static bool IsPartialMatchKeys(IReadOnlyList<string> commands, string[] keys)
+        
+        private static void FetchCommandsRecursive(
+            CommandService service,
+            IReadOnlyList<string> query,
+            List<string> currentPath,
+            List<SearchItem> searchItems,
+            SearchContext context,
+            SearchProvider provider)
         {
-            if (commands.Count > keys.Length)
+            // Check handlers in current scope
+            foreach (var (name, handler) in service.HandlerMap)
+            {
+                currentPath.Add(name.ToString());
+                if (IsPartialMatchKeys(query, currentPath))
+                {
+                    // Create SearchItem for this handler
+                    var commandPath = string.Join(" ", currentPath);
+                    var item = provider.CreateItem(context, commandPath);
+                    
+                    string description = "Run command";
+                    var hints = handler.GetType().GetCustomAttributes(typeof(ICommandHandler.HintAttribute), true);
+                    if (hints.Length > 0)
+                    {
+                        if (hints[0] is ICommandHandler.HintAttribute hintAttribute)
+                        {
+                            description = hintAttribute.description;
+                        }
+                    }
+                    item.description = description;
+                    item.thumbnail = (Texture2D)EditorGUIUtility.IconContent("d_console.infoicon").image;
+                    item.data = new CommandCall(context.searchQuery, handler);
+                    searchItems.Add(item);
+                }
+                currentPath.RemoveAt(currentPath.Count - 1);
+            }
+
+            // Recurse into sub-scopes
+            foreach (var (name, subService) in service.ServiceScopeMap)
+            {
+                currentPath.Add(name.ToString());
+                if (IsPartialMatchKeys(query, currentPath))
+                {
+                    FetchCommandsRecursive(subService, query, currentPath, searchItems, context, provider);
+                }
+                currentPath.RemoveAt(currentPath.Count - 1);
+            }
+        }
+
+        private static bool IsPartialMatchKeys(IReadOnlyList<string> commands, IReadOnlyList<string> keys)
+        {
+            if (commands.Count > keys.Count)
                 return false;
 
             for (var i = 0; i < commands.Count; i++)
@@ -121,9 +149,9 @@ namespace cfEngine.Command
     public class CommandCall
     {
         public readonly string query;
-        public readonly ICommand command;
+        public readonly ICommandHandler command;
 
-        public CommandCall(string query, ICommand command)
+        public CommandCall(string query, ICommandHandler command)
         {
             this.query = query;
             this.command = command;
@@ -141,19 +169,7 @@ namespace cfEngine.Command
                 {
                     if (item.data is CommandCall call)
                     {
-                        var words = call.query.Split(' ');
-                        using var commandsHandle = ListPool<string>.Get(out var commands);
-                        using var argsHandle = DictionaryPool<string, string>.Get(out var args);
-                        CommandSearchWindow.ExtractCommandArgsFromWords(words, commands, args);
-
-                        if (call.command != null)
-                        {
-                            call.command.Execute(args);
-                        }
-                        else
-                        {
-                            Debug.LogError($"Command not found: {string.Join(' ', commands)}");
-                        }
+                        CommandService.instance.Execute(call.query);
                     }
                 }
             };
