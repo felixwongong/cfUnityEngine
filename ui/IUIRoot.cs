@@ -16,13 +16,4 @@ namespace cfUnityEngine.UI
         public IUIPanel GetPanel(string panelId);
         public T GetPanel<T>(string panelId) where T : IUIPanel;
     }
-
-    public static class UIRoot
-    {
-        public static IUIRoot Current { get; private set; }
-        public static void SetCurrent(IUIRoot instance)
-        {
-            Current = instance;
-        }
-    }
 }
