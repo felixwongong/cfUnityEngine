@@ -1,3 +1,5 @@
+#if CF_GOOGLE_DRIVE && UNITY_EDITOR
+
 using UnityEditor;
 using cfEngine.Command;
 using CommandService = cfEngine.Command.CommandService;
@@ -31,3 +33,5 @@ namespace cfUnityEngine.GoogleDrive
         }
     }
 }
+
+#endif
