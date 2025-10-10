@@ -8,7 +8,7 @@ namespace cfUnityEngine.Util
         where TStateMachine: MonoStateMachine<TStateId, TState, TStateMachine> 
         where TState : MonoState<TStateId, TState, TStateMachine>
     {
-        public abstract TStateId Id { get; }
+        public abstract TStateId id { get; }
         protected TStateMachine stateMachine { get; private set; }
         
         [SerializeField] private GameObject[] stateObjects;
