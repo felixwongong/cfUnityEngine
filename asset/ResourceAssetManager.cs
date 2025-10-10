@@ -7,6 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using cfEngine.Asset;
 using cfEngine.Logging;
+using cfUnityEngine.Util;
 using UnityEngine;
 
 namespace cfUnityEngine.Asset
@@ -14,7 +15,8 @@ namespace cfUnityEngine.Asset
     public class ResourceAssetManager : AssetManager<UnityEngine.Object>
     {
         private MonoBehaviour _mono;
-        public ResourceAssetManager(string gameObjectName = nameof(ResourceAssetManager)): base()
+
+        public ResourceAssetManager(string gameObjectName = nameof(ResourceAssetManager)) : base()
         {
             var gameObject = new GameObject(gameObjectName)
             {
@@ -25,12 +27,12 @@ namespace cfUnityEngine.Asset
                     HideFlags.HideAndDontSave |
 #endif
                     HideFlags.NotEditable
-            }; 
-            
-            _mono = gameObject.AddComponent<MonoBehaviour>();
+            };
+
+            _mono = gameObject.AddComponent<EmptyBehaviour>();
             UnityEngine.Object.DontDestroyOnLoad(gameObject);
         }
-        
+
         protected override AssetHandle<T> _Load<T>(string path)
         {
             var asset = Resources.Load<T>(path);
@@ -56,7 +58,9 @@ namespace cfUnityEngine.Asset
                 var req = Resources.LoadAsync<T>(path);
 
                 _mono.StartCoroutine(WaitLoadRequest(req, tcs, token));
-                IEnumerator WaitLoadRequest(ResourceRequest request, TaskCompletionSource<AssetHandle<T>> tcs, CancellationToken token)
+
+                IEnumerator WaitLoadRequest(ResourceRequest request, TaskCompletionSource<AssetHandle<T>> tcs,
+                    CancellationToken token)
                 {
                     while (true)
                     {
@@ -76,9 +80,10 @@ namespace cfUnityEngine.Asset
                             {
                                 tcs.SetResult(new AssetHandle<T>(t, () => { }));
                             }
+
                             break;
                         }
-                        
+
                         yield return null;
                     }
                 }
