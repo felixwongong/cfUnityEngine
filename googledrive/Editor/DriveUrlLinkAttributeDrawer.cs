@@ -18,10 +18,10 @@ namespace cfUnityEngine.GoogleDrive
             if (property.isExpanded)
             {
                 var getUrlInfo = GoogleDriveUtil.ParseUrl(url);
-                if (getUrlInfo.TryGetError(out var error))
+                if (getUrlInfo.HasError(out var error))
                 {
                     EditorGUI.LabelField(GetShiftedLineRect(position, totalLine++), $"Error: {error.Message}");
-                } else if (getUrlInfo.TryGetValue(out var urlInfo))
+                } else if (getUrlInfo.HasResult(out var urlInfo))
                 {
                     EditorGUI.indentLevel++;
                     EditorGUI.EnumPopup(GetShiftedLineRect(position, totalLine++), "File Type", urlInfo.fileType);
