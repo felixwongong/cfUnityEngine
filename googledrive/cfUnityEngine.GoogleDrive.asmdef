@@ -2,10 +2,8 @@
     "name": "cfUnityEngine.GoogleDrive",
     "rootNamespace": "",
     "references": [
-        "cfUnityEngine.Command",
-        "cfEngine",
         "cfUnityEngine",
-        "CofyExcelParser"
+        "Modules"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
