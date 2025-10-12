@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Threading.Tasks;
 using cfEngine.Logging;
+using cfUnityEngine.Util;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -32,6 +33,12 @@ namespace cfUnityEngine.SceneManagement
             StartCoroutine(_loadSceneAsync(loadTaskSource, sceneKey, mode, progress));
             
             return loadTaskSource.Task;
+        }
+
+        public Task UnloadSceneAsync(string sceneKey)
+        {
+            var aop = SceneManager.UnloadSceneAsync(sceneKey);
+            return aop.ToTask();
         }
 
         private IEnumerator _loadSceneAsync(TaskCompletionSource<AsyncOperation> loadTaskSource, string sceneKey, LoadSceneMode mode = LoadSceneMode.Single, IProgress<float> progress = null)
