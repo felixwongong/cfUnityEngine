@@ -35,10 +35,13 @@ namespace cfUnityEngine.SceneManagement
             return loadTaskSource.Task;
         }
 
-        public Task UnloadSceneAsync(string sceneKey)
+        public Task UnloadSceneAsync(string sceneKey, IProgress<float> progress = null)
         {
             var aop = SceneManager.UnloadSceneAsync(sceneKey);
-            return aop.ToTask();
+            if (progress != null)
+                return aop.ToTask(this, progress);
+            else
+                return aop.ToTask();
         }
 
         private IEnumerator _loadSceneAsync(TaskCompletionSource<AsyncOperation> loadTaskSource, string sceneKey, LoadSceneMode mode = LoadSceneMode.Single, IProgress<float> progress = null)

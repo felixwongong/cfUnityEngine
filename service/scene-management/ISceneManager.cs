@@ -9,7 +9,7 @@ namespace cfUnityEngine.SceneManagement
     {
         public bool LoadScene(string sceneKey, LoadSceneMode mode = LoadSceneMode.Single);
         public Task LoadSceneAsync(string sceneKey, LoadSceneMode mode = LoadSceneMode.Single, IProgress<float> progress = null);
-        public Task UnloadSceneAsync(string sceneKey);
+        public Task UnloadSceneAsync(string sceneKey, IProgress<float> progress = null);
         public Scene GetActiveScene();
         public Scene GetScene(string sceneName);
     }
