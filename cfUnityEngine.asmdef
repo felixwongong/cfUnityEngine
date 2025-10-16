@@ -6,6 +6,7 @@
         "Unity.ResourceManager",
         "Unity.2D.Animation.Runtime",
         "Unity.TextMeshPro",
+        "Unity.InputSystem",
         "Modules"
     ],
     "includePlatforms": [],
