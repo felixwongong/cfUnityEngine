@@ -1,5 +1,3 @@
-using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -12,8 +10,11 @@ public class SpriteAnimation : MonoBehaviour
 
     [SerializeField] private float swapInterval = 0.2f;
 
-    private Coroutine swapAnimCoroutine;
     private string currentCategory = string.Empty;
+    private int currentLabelIndex = 0;
+    private float timer = 0f;
+    private List<string> currentLabels = new List<string>();
+    private bool loop = false;
 
     private void Awake()
     {
@@ -27,9 +28,37 @@ public class SpriteAnimation : MonoBehaviour
     private void OnDisable()
     {
         currentCategory = string.Empty;
-        if (swapAnimCoroutine != null)
+        currentLabels.Clear();
+        currentLabelIndex = 0;
+        timer = 0f;
+    }
+
+    private void Update()
+    {
+        if (string.IsNullOrEmpty(currentCategory) || currentLabels.Count == 0)
+            return;
+
+        timer += Time.deltaTime;
+
+        if (timer >= swapInterval)
         {
-            StopCoroutine(swapAnimCoroutine);
+            timer -= swapInterval;
+            currentLabelIndex++;
+
+            if (currentLabelIndex >= currentLabels.Count)
+            {
+                if (loop)
+                {
+                    currentLabelIndex = 0;
+                }
+                else
+                {
+                    currentLabelIndex = currentLabels.Count - 1;
+                    return;
+                }
+            }
+
+            resolver.SetCategoryAndLabel(currentCategory, currentLabels[currentLabelIndex]);
         }
     }
 
@@ -43,44 +72,19 @@ public class SpriteAnimation : MonoBehaviour
         return GetLabels(categoryName).Count() * swapInterval;
     }
     
-    public void Play(string categoryName, bool playLoop = false, float speedMultiplier = 1, Action<int> onPlayFrame = null, Action onAnimationEnd = null)
+    public void Play(string categoryName, bool shouldLoop = true)
     {
         if(currentCategory.Equals(categoryName)) return;
 
         currentCategory = categoryName;
-        
-        if(swapAnimCoroutine != null)
-            StopCoroutine(swapAnimCoroutine);
+        currentLabels = GetLabels(categoryName).ToList();
+        currentLabelIndex = 0;
+        timer = 0f;
+        loop = shouldLoop;
 
-        var labels = GetLabels(categoryName).ToList();
-        if (labels.Count == 0)
-            throw new ArgumentException($"category {categoryName} not found", nameof(categoryName));
-        
-        int currentIndex = 0;
-
-        swapAnimCoroutine = StartCoroutine(swapRoutine());
-        
-        IEnumerator swapRoutine()
+        if (currentLabels.Count > 0)
         {
-            while (categoryName.Equals(currentCategory) && (playLoop || currentIndex < labels.Count))
-            {
-                currentIndex %= labels.Count;
-
-                var label = labels[currentIndex];
-                resolver.SetCategoryAndLabel(categoryName, label);
-                
-                onPlayFrame?.Invoke(currentIndex);
-
-                yield return new WaitForSeconds(swapInterval / speedMultiplier);
-
-                if (!playLoop && currentIndex == labels.Count - 1)
-                {
-                    onAnimationEnd?.Invoke();
-                    yield break;
-                }
-                
-                currentIndex++;
-            }
+            resolver.SetCategoryAndLabel(currentCategory, currentLabels[0]);
         }
     }
 }
