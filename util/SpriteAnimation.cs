@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using cfEngine;
 using UnityEngine;
 using UnityEngine.U2D.Animation;
 
@@ -72,19 +73,24 @@ public class SpriteAnimation : MonoBehaviour
         return GetLabels(categoryName).Count() * swapInterval;
     }
     
-    public void Play(string categoryName, bool shouldLoop = true)
+    public void Play(string categoryName, bool shouldLoop)
     {
         if(currentCategory.Equals(categoryName)) return;
 
         currentCategory = categoryName;
         currentLabels = GetLabels(categoryName).ToList();
+        if (currentLabels.Count == 0)
+        {
+            Log.LogWarning($"[SpriteAnimation] No labels found for category: {categoryName}");
+            currentCategory = string.Empty;
+            currentLabelIndex = 0;
+            timer = 0f;
+            return;
+        }
+        
         currentLabelIndex = 0;
         timer = 0f;
         loop = shouldLoop;
-
-        if (currentLabels.Count > 0)
-        {
-            resolver.SetCategoryAndLabel(currentCategory, currentLabels[0]);
-        }
+        resolver.SetCategoryAndLabel(currentCategory, currentLabels[0]);
     }
 }

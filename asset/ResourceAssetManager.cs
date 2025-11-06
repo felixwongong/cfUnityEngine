@@ -6,7 +6,7 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using cfEngine.Asset;
-using cfEngine.Logging;
+using cfEngine;
 using cfUnityEngine.Util;
 using UnityEngine;
 

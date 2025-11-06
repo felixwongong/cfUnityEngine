@@ -38,6 +38,7 @@ namespace cfUnityEngine.Util
         public virtual void _Start() { }
 
         public virtual void _Update() { }
+        public virtual void _FixedUpdate() { }
 
         public virtual bool IsReady(StateParam param) => true;
         public virtual bool CanUpdate() => true;

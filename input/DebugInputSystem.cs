@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using cfEngine.Input;
-using cfEngine.Logging;
+using cfEngine;
 using cfEngine.Rx;
 using UnityEngine;
 using UnityEngine.InputSystem;

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using cfEngine;
 using cfUnityEngine.Logging;
 using UnityEngine;
-using ILogger = cfEngine.Logging.ILogger;
+using ILogger = cfEngine.ILogger;
 
 namespace cfUnityEngine.GoogleDrive
 {

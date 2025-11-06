@@ -1,5 +1,5 @@
 using System;
-using cfEngine.Logging;
+using cfEngine;
 using cfEngine.Rx;
 
 namespace cfUnityEngine

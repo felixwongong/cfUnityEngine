@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using cfEngine.Asset;
 using cfEngine.Extension;
 using UnityEngine;
-using cfEngine.Logging;
+using cfEngine;
 using Object = UnityEngine.Object;
 
 namespace cfUnityEngine.UI.UGUI

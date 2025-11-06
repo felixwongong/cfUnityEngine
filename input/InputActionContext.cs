@@ -20,6 +20,11 @@ namespace cfUnityEngine.Input
         // Need optimize boxing
         public Res<T, Exception> GetValue<T>()
         {
+            if (value == null)
+            {
+                return default(T);
+            }
+
             try
             {
                 return (T)value;

@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using cfEngine.Logging;
+using cfEngine;
 using cfEngine.Rx;
 using cfEngine.Util;
 using UnityEngine;
@@ -86,7 +86,20 @@ namespace cfUnityEngine.Util
         protected virtual void _Update()
         {
         }
+        
+        private void FixedUpdate()
+        {
+            _FixedUpdate();
+            if (currentState != null && currentState.CanUpdate())
+            {
+                currentState._FixedUpdate();
+            }
+        }
 
+        protected virtual void _FixedUpdate()
+        {
+        }
+        
         public virtual void StartMachine()
         {
             

@@ -1,7 +1,7 @@
 using System;
 using System.Collections;
 using System.Threading.Tasks;
-using cfEngine.Logging;
+using cfEngine;
 using cfUnityEngine.Util;
 using UnityEngine;
 using UnityEngine.SceneManagement;
